@@ -1,0 +1,17 @@
+*
+
+!*.md
+!LICENSE
+!*.py
+!.gitignore
+
+# Files in subfolders
+data/
+
+# Specific files to ignore
+*_functions.py
+
+
+
+
+
