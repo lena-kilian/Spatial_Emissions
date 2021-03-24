@@ -1,3 +1,5 @@
+__pycache__/
+
 *
 
 !*.md
@@ -7,6 +9,8 @@
 
 # Files in subfolders
 data/
+outputs/
+!src/
 
 # Specific files to ignore
 *_functions.py
