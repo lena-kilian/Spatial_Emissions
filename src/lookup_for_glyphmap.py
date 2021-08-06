@@ -18,26 +18,26 @@ import mapclassify
 import random
 import math
 
-data_directory = "/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/Spatial_Emissions"
+data_directory = "/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis"
 
-# import mean income data to adjust incomes for inflation (using 2019 for adjustment)
-income_equivalised = pd.read_excel(eval("r'" + data_directory + "/data/raw/Mean_Income_Equivalised.xls'"), header=6).dropna(how='any')
-income_equivalised.loc[income_equivalised['year'].str.contains('/'), 'year'] = income_equivalised['year'].str.split('/').str[0]
-income_equivalised = income_equivalised.astype(int).set_index('year')
-
-# import ghg data & adjust income for inflation
+inflation = [1.32, 1.27, 1.28, 1.22, 1.16, 1.12, 1.09, 1.06, 1.05, 1.04, 1.0]    
+    
 ghg = {}; income = {}; data = {}
 for year in range(2007, 2018):
     # import ghg and income
     ghg[year] = pd.read_csv(eval("r'" + data_directory + "/data/processed/GHG_Estimates/MSOA_" + str(year) + ".csv'"))
     income[year] = pd.read_csv(eval("r'" + data_directory + "/data/processed/Income/UK_Income_MSOA_" + str(year) + ".csv'"))
     # adjust for equivalised incomes (account for inflation)
-    income[year]['Income anonymised'] = income[year]['Income anonymised'] * income[year]['population']
-    total_income = income_equivalised.loc[year, 'Mean equivalised disposable income'] * income[year]['population'].sum()
-    income[year]['Income anonymised'] = ((income[year]['Income anonymised'] / income[year]['Income anonymised'].sum()) * total_income) / income[year]['population']
+    #income[year]['Income anonymised'] = income[year]['Income anonymised'] * income[year]['population']
+    #total_income = income_equivalised.loc[year, 'Mean equivalised disposable income'] * income[year]['population'].sum()
+    
+    income[year]['Income anonymised'] = income[year]['Income anonymised'] *  inflation[year-2007]
+    
+    #income[year]['Income anonymised'] = ((income[year]['Income anonymised'] / income[year]['Income anonymised'].sum()) * total_income) / income[year]['population']
     # add income and ghg to one dataset
     data[year] = ghg[year].join(income[year][['Income anonymised']])
     data[year]['total_ghg'] = data[year].loc[:,'1.1.1.1':'12.5.3.5'].sum(1)
+
 
 # load geog data to match with ghg (msoa level)
 msoa_2011 = gpd.read_file(eval("r'" + data_directory + "/data/raw/Geography/Shapefiles/UK/msoa_2011_uk_all.shp'")).set_index('MSOA11CD')[['geometry']]
