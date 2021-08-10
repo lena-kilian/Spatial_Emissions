@@ -4,6 +4,21 @@ library(purrr)
 
 setwd("~/Documents/Ausbildung/UoLeeds/PhD/Analysis")
 
+# regression plot
+all_data <- read_csv('Spatial_Emissions/outputs/all_data_for_plot_GISRUK.csv') %>%
+  mutate(Year = as.character(year),
+         `Income per capita` = `Income anonymised`,
+         `tCO2e per capita` = total_ghg)
+
+colors <- c('#A6CEE3', '#1F78B4', '#B2DF8A', '#34A02C', '#FB9A99', '#E31A1C', '#FDBF6F', '#B15928', '#FF7F00', '#CAB2D6', '#6A3D9A')
+ggplot(data = all_data, aes(x = `Income per capita`, y =`tCO2e per capita`, color=Year)) + 
+  geom_point(fill='white', alpha=0.05, size=0.5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values=colors) + 
+  theme_classic()
+ggsave('Spatial_Emissions/outputs/regression_plots.png')
+
+#other
 local_coef2 <- read_sf('Spatial_Emissions/outputs/local_coefficients_2007-17.shp') %>% 
   data_frame() %>% 
   select(-MSOA, -geometry) %>% 

@@ -114,9 +114,9 @@ ghg_data <- mutate(ghg_data, years_rescaled=scales::rescale(year, to=c(0, cell_h
 # colour (mark colour) : not encoded 
 # alpha (mark lightness) : not encoded 
 
-for (var in c('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'total_ghg', 'Income anonymised')){
+for (var in c('Income anonymised')){ #'1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'total_ghg', 
   lines <- run_plot(my_data=ghg_data, variable=var, cell_height=cell_height, grid_data=grids)
-  ggsave(paste('outputs/Glyphmaps/glyphmaps_', var, '.png', sep=''))
+  ggsave(paste('Spatial_Emissions/outputs/Glyphmaps/glyphmaps_', var, '.png', sep=''))
 }
 
 
