@@ -14,7 +14,6 @@ import copy as cp
 from datetime import datetime
 import geopandas as gpd
 import pickle
-import geoplot as gplt
 
 wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 years = list(range(2007, 2018, 2))
@@ -46,8 +45,6 @@ london_2011 = msoa_2011.loc[msoa_2011['RGN11NM'] == 'London']
 ptal_2015_points = gpd.GeoDataFrame(ptal_2015_grid, geometry=gpd.points_from_xy(ptal_2015_grid['X'], ptal_2015_grid['Y']))
 ptal_2015_points.loc[ptal_2015_points['AI2015'] > 0].plot(column='AI2015')
 
-gplt.kdeplot(data=ptal_2015_points, hue='AI2015', cmap='Reds')
-
 new_london = london_2011.to_crs(epsg=32610); new_london['geometry']
 
 london_2011.to_file(wd + '/data/raw/PTAL/2015_Grid/London_MSOAs_2011.shp')
@@ -78,7 +75,7 @@ cat_dict = pd.read_excel(wd + '/data/processed/LCFS/Meta/lcfs_desc_anne&john.xls
 cats = cat_dict[['category']].drop_duplicates()['category']
 cat_dict['ccp_code'] = [x.split(' ')[0] for x in cat_dict['ccp']]
 cat_dict = dict(zip(cat_dict['ccp_code'], cat_dict['category_5']))
-for year in [2017]: #years:
+for year in years:
     new_cat_shp[year] = emissions[year].rename(columns=cat_dict).sum(axis=1, level=0)
     new_cat_shp[year] = ptal_2015_msoa[['geometry', 'AI2015', 'AI2015_ln', 'PTAL2015']].join(new_cat_shp[year])
 
@@ -97,10 +94,17 @@ for item in idx:
     plt.title(str(year) + ' ' + item); plt.show()
 
 
-#temp = new_cat_shp[2017][idx + ['geometry', 'AI2015_ln', 'AI2015']].reset_index()
-#temp.columns = ['MSOA11CD', 'Petrol', 'other_priv', 'rail_bus', 'air', 'rental_taxi', 'water', 'geometry', 'AI2015_ln', 'AI2015']
+#temp = new_cat_shp[2017][idx + ['geometry', 'population', 'AI2015_ln', 'AI2015']].reset_index()
+#temp[idx] = temp[idx].apply(lambda x: x*temp['population'])
+#temp.columns = ['MSOA11CD', 'Petrol', 'other_priv', 'rail_bus', 'air', 'rental_taxi', 'water', 'geometry', 'pop', 'AI2015_ln', 'AI2015']
 #temp.to_file(wd + 'data/processed/GWR_data/transport_access.shp')
 
+all_data_shp = pd.DataFrame()
+for year in years:
+    temp = cp.copy(new_cat_shp[year])
+    temp['year'] = year
+    temp = temp.join(lookup[['MSOA11CD', 'RGN11NM']].set_index('MSOA11CD'))
+    all_data_shp = all_data_shp.append(temp)
     
 all_data = all_data_shp.drop('geometry', axis=1)
     

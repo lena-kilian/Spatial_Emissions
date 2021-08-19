@@ -20,6 +20,9 @@ wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 years = list(range(2007, 2018, 2))
 geog = 'MSOA'
 
+
+dict_cat = 'category_6'
+
 lookup = pd.read_csv(wd + 'data/raw/Geography/Conversion_Lookups/UK_full_lookup_2001_to_2011.csv')\
     [['MSOA11CD', 'MSOA01CD', 'RGN11NM']].drop_duplicates()
 ew_shp = gpd.read_file(wd + 'data/raw/Geography/Shapefiles/EnglandWales/msoa_2011_ew.shp')\
@@ -55,7 +58,11 @@ new_cat = {}
 cat_dict = pd.read_excel(wd + '/data/processed/LCFS/Meta/lcfs_desc_anne&john.xlsx')
 cats = cat_dict[['category']].drop_duplicates()['category']
 cat_dict['ccp_code'] = [x.split(' ')[0] for x in cat_dict['ccp']]
-cat_dict = dict(zip(cat_dict['ccp_code'], cat_dict['category_5']))
+
+idx = cat_dict[[dict_cat]].drop_duplicates()[dict_cat].tolist(); idx.remove('other')
+
+cat_dict = dict(zip(cat_dict['ccp_code'], cat_dict[dict_cat]))
+
 for year in years:
     new_cat[year] = emissions[year].rename(columns=cat_dict).sum(axis=1, level=0)
     new_cat[year] = new_cat[year].join(income[year][['Income anonymised']]).rename(columns={'Income anonymised':'income'})
@@ -71,8 +78,6 @@ for year in years + ['2017_ons']:
     new_cat_shp[year] = gpd.GeoDataFrame(new_cat_shp[year], geometry='geometry')
 
 
-idx = ['Private transport: Petrol, diesel, motoring oils', 'Private transport: other', 
-       'Rail, bus transport', 'Air transport', 'Private transport: Rental, taxi', 'Water transport']
 for year in [2017, '2017_ons']:
     for item in idx:
         sns.scatterplot(data=new_cat_shp[2017], x='income', y=item, hue='RGN11NM'); 
