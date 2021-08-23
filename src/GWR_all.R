@@ -16,7 +16,7 @@ yr <- 2015
 
 shp_data <- read_sf(paste('data/processed/GWR_data/gwr_data_london_', yr, '.shp', sep='')) %>%
   mutate(total_inc = income * population / 1000, 
-         total_work = total_work * population / 10,
+         total_work = avg_workpl * population / 10,
          MSOA11CD = index)
 
 # -------------------------------------------
@@ -26,7 +26,7 @@ product_list = c("Car.van.pu", "Rail.and.b", "Flights")
 
 # Only control for population
 for (product in product_list){ #'rental_tax', 'water',  'other_priv'
-  for (variable in c('AI2015_ln', 'not_lim', 'pop_65.', 'pop_14.', 'total_work', 'total_inc')){
+  for (variable in c('total_work')){ # 'AI2015_ln', 'not_lim', 'pop_65.', 'pop_14.', 'total_inc')){
     temp <- shp_data %>% rename(ghg=product, predictor=variable) %>% select(MSOA11CD, predictor, ghg, geometry, population) %>% drop_na() %>% st_as_sf()
     # convert to sp
     mydata.sp <- as(temp, "Spatial")
@@ -37,7 +37,7 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     
     # plot residuals
     par(mfrow=c(2,2))
-    m.lm <- lm(ghg ~ predictor + population + total_inc, data=st_drop_geometry(temp))
+    m.lm <- lm(ghg ~ predictor + population, data=st_drop_geometry(temp))
     res <- m.gwr$SDF$residual
     plot(x=m.gwr$SDF$yhat, y=res)
     qqnorm(res)
@@ -57,7 +57,9 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     map <- tm_shape(gwr_sf) +
       tm_fill('predictor', midpoint = 0, style = "kmeans") + 
       tm_style("col_blind") +
-      tm_layout(legend.position = c("right","top"), frame = F, title=paste(product, variable, sep='_')) 
+      tm_borders(lwd = 0.1) +
+      tm_layout(frame = F, title=paste(product, variable, sep='_'), title.position = c(0, 0.99), title.size = 0.5,
+                legend.position = c(0.8, 0.1), legend.title.size = 1.3, legend.text.size = 1, legend.text.fontfamily="Times New Roman")
     tmap_save(map, paste('Spatial_Emissions/outputs/GWR/maps/London_', str_replace_all(product, "[^[:alnum:]]", ""), 
                          '_', str_replace_all(variable, "[^[:alnum:]]", ""), '_',  yr, '.png', sep=''))
     # make global summary
@@ -82,7 +84,7 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
 
 # Also control for income
 for (product in product_list){ #'rental_tax', 'water',  'other_priv'
-  for (variable in c('AI2015_ln', 'not_lim', 'pop_65.', 'pop_14.', 'total_work')){
+  for (variable in  c('total_work')){ # 'AI2015_ln', 'not_lim', 'pop_65.', 'pop_14.', 'total_inc')){
     temp <- shp_data %>% rename(ghg=product, predictor=variable) %>% select(MSOA11CD, predictor, ghg, geometry, population, total_inc) %>% 
       drop_na() %>% st_as_sf()
     # convert to sp
@@ -114,7 +116,9 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     map <- tm_shape(gwr_sf) +
       tm_fill('predictor', midpoint = 0, style = "kmeans") + 
       tm_style("col_blind") +
-      tm_layout(legend.position = c("right","top"), frame = F, title=paste(product, variable, sep='_')) 
+      tm_borders(lwd = 0.1) +
+      tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.99), title.size = 0.5,
+                legend.position = c(0.8, 0.1), legend.title.size = 1.3, legend.text.size = 1, legend.text.fontfamily="Times New Roman")
     tmap_save(map, paste('Spatial_Emissions/outputs/GWR/maps/London_', str_replace_all(product, "[^[:alnum:]]", ""), 
                          '_', str_replace_all(variable, "[^[:alnum:]]", ""), '_',  yr, '_w-inc.png', sep=''))
     

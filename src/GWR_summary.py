@@ -40,7 +40,7 @@ for ghg in ghg_list:
         global_results[ghg + '_' + var]['income_control'] = False
         
         if var != 'totalinc':
-            temp = pd.read_csv(wd + 'Spatial_Emissions/outputs/GWR/global_coef_london_' + 
+            temp = pd.read_csv(wd + 'Spatial_Emissions/outputs/GWR/global_coeffs/global_coef_london_' + 
                                                       ghg + '_' + var + '_' + str(yr) + '_w-inc.csv')
             
             fit = temp[model_fit].drop_duplicates().T.reset_index()

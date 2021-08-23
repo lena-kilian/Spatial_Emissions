@@ -84,3 +84,6 @@ for ghg in ghg_list:
             plt.title(ghg + '_' + var + '_inccont:_' + str(option));
             plt.axvline(x=global_val['Global Estimate'][0])
             plt.show()
+            
+local_results.merge(global_results, on=['transport', 'pred', 'income_controlled'])\
+    .to_csv(wd + 'Spatial_Emissions/outputs/GWR/local_coeffs/all_for_plot.csv')
