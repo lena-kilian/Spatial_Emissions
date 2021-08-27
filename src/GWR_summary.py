@@ -18,9 +18,9 @@ geog = 'MSOA'
 yr = 2015
 
 ghg_list = ['Carvanpu', 'Railandb', 'Flights']
-var_list = ['AI2015ln', 'notlim', 'pop65', 'pop14', 'totalwork', 'totalinc']
+var_list = ['AI2015ln', 'lim', 'pop65', 'pop14', 'bame', 'totalwork', 'totalinc']
 
-var_list2 = ['AI2015_ln', 'not_lim', 'pop_65.', 'pop_14.', 'total_work', 'total_inc']
+var_list2 = ['AI2015_ln', 'lim', 'pop_65.', 'pop_14.', 'bame', 'total_work', 'total_inc']
 
 model_fit = ['RSS.gw', 'AIC', 'AICc', 'enp', 'edf', 'gw.R2', 'gwR2.adj', 'BIC']
 global_results = {}

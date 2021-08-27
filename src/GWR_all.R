@@ -26,7 +26,7 @@ product_list = c("Car.van.pu", "Rail.and.b", "Flights")
 
 # Only control for population
 for (product in product_list){ #'rental_tax', 'water',  'other_priv'
-  for (variable in c('total_work')){ # 'AI2015_ln', 'not_lim', 'pop_65.', 'pop_14.', 'total_inc')){
+  for (variable in c('total_work', 'AI2015_ln', 'lim', 'pop_65.', 'pop_14.', 'total_inc', 'bame')){
     temp <- shp_data %>% rename(ghg=product, predictor=variable) %>% select(MSOA11CD, predictor, ghg, geometry, population) %>% drop_na() %>% st_as_sf()
     # convert to sp
     mydata.sp <- as(temp, "Spatial")
@@ -55,11 +55,12 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     
     # map local coef
     map <- tm_shape(gwr_sf) +
-      tm_fill('predictor', midpoint = 0, style = "kmeans") + 
+      tm_fill('predictor', midpoint = 0, style = "kmeans", title="Local Coefficients") + 
       tm_style("col_blind") +
       tm_borders(lwd = 0.1) +
-      tm_layout(frame = F, title=paste(product, variable, sep='_'), title.position = c(0, 0.99), title.size = 0.5,
-                legend.position = c(0.8, 0.1), legend.title.size = 1.3, legend.text.size = 1, legend.text.fontfamily="Times New Roman")
+      tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.999), title.size = 0.5,
+                legend.position = c(0.8, 0.1), legend.title.size = 1.3, legend.title.fontfamily="Times New Roman", 
+                legend.text.size = 1, legend.text.fontfamily="Times New Roman")
     tmap_save(map, paste('Spatial_Emissions/outputs/GWR/maps/London_', str_replace_all(product, "[^[:alnum:]]", ""), 
                          '_', str_replace_all(variable, "[^[:alnum:]]", ""), '_',  yr, '.png', sep=''))
     # make global summary
@@ -84,7 +85,7 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
 
 # Also control for income
 for (product in product_list){ #'rental_tax', 'water',  'other_priv'
-  for (variable in  c('total_work')){ # 'AI2015_ln', 'not_lim', 'pop_65.', 'pop_14.', 'total_inc')){
+  for (variable in  c('total_work', 'AI2015_ln', 'lim', 'pop_65.', 'pop_14.', 'total_inc', 'bame')){
     temp <- shp_data %>% rename(ghg=product, predictor=variable) %>% select(MSOA11CD, predictor, ghg, geometry, population, total_inc) %>% 
       drop_na() %>% st_as_sf()
     # convert to sp
@@ -114,13 +115,25 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     
     # map local coef
     map <- tm_shape(gwr_sf) +
-      tm_fill('predictor', midpoint = 0, style = "kmeans") + 
+      tm_fill('predictor', midpoint = 0, style = "kmeans", title="Local Coefficients") + 
       tm_style("col_blind") +
       tm_borders(lwd = 0.1) +
-      tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.99), title.size = 0.5,
-                legend.position = c(0.8, 0.1), legend.title.size = 1.3, legend.text.size = 1, legend.text.fontfamily="Times New Roman")
+      tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.999), title.size = 0.5,
+                legend.position = c(0.8, 0.1), legend.title.size = 1.3, legend.title.fontfamily="Times New Roman",
+                legend.text.size = 1, legend.text.fontfamily="Times New Roman")
     tmap_save(map, paste('Spatial_Emissions/outputs/GWR/maps/London_', str_replace_all(product, "[^[:alnum:]]", ""), 
-                         '_', str_replace_all(variable, "[^[:alnum:]]", ""), '_',  yr, '_w-inc.png', sep=''))
+                         '_', str_replace_all(variable, "[^[:alnum:]]", ""), '_',  yr, '_w-inc.png', sep='')) 
+    
+    map <- tm_shape(gwr_sf) +
+      tm_fill('total_inc', midpoint = 0, style = "kmeans", title="Local Coefficients") + 
+      tm_style("col_blind") +
+      tm_borders(lwd = 0.1) +
+      tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.999), title.size = 0.5,
+                legend.position = c(0.8, 0.1), legend.title.size = 1.3, legend.title.fontfamily="Times New Roman",
+                legend.text.size = 1, legend.text.fontfamily="Times New Roman")
+    tmap_save(map, paste('Spatial_Emissions/outputs/GWR/maps/INCOME_London_', str_replace_all(product, "[^[:alnum:]]", ""), 
+                         '_', str_replace_all(variable, "[^[:alnum:]]", ""), '_',  yr, '_w-inc.png', sep='')) 
+    
     
     # make global summary
     temp <- summary(m.gwr$lm)$coef %>% t()

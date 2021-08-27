@@ -60,6 +60,13 @@ for year in years:
     temp.loc[temp['RGN11NM'] != 'London', 'RGN'] = 'Rest of England'
     all_data = all_data.append(temp)
 
+
+england_avg = cp.copy(all_data)
+england_avg[idx] = england_avg[idx].apply(lambda x: x*england_avg['population'])
+england_avg = england_avg.groupby(['year']).sum()
+england_avg[idx] = england_avg[idx].apply(lambda x: x/england_avg['population'])
+
+
 summary = cp.copy(all_data)
 summary[idx] = summary[idx].apply(lambda x: x*summary['population'])
 summary = summary.groupby(['year', 'RGN']).sum()

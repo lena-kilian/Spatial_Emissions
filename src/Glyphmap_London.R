@@ -22,12 +22,13 @@ my_data <- shp_data %>%
   mutate(easting = ifelse(minx < 530000 & width < 3000, maxx - 3000, minx),
          northing = ifelse(miny < 180000 & width < 3000, maxy - 3000, miny),
          area_grid = (maxx-minx) * (maxy-miny),
-         area_nm_str = paste('id', id, sep=''), area_nm = id) %>%
+         area_nm_str = paste('id', id, sep=''), area_nm = id,
+         land_transport = Car.van.pu + Rail.and.b) %>%
   arrange(year) 
 
 #2007, 2009, 2011, 2013, 2015, 2017, 
 
-products <- my_data %>% st_drop_geometry() %>% select(c(width:population)) %>% select(-width, -population) %>% names()
+products <- my_data %>% st_drop_geometry() %>% select(c(width:population, land_transport)) %>% select(-width, -population) %>% names()
 
 # Set theme.
 theme_set(theme_minimal(base_family="Avenir Book"))
