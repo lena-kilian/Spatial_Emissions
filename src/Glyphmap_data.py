@@ -15,7 +15,7 @@ wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 years = list(range(2007, 2018, 2))
 geog = 'MSOA'
 
-dict_cat = 'category_6'
+dict_cat = 'category_8'
 
 lookup = pd.read_csv(wd + 'data/raw/Geography/Conversion_Lookups/UK_full_lookup_2001_to_2011.csv')\
     [['MSOA11CD', 'MSOA01CD', 'RGN11NM']].drop_duplicates()

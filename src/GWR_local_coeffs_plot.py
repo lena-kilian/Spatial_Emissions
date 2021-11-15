@@ -19,7 +19,15 @@ geog = 'MSOA'
 
 yr = 2015
 
-ghg_list = ['Carvanpu', 'Railandb', 'Flights']
+dict_cat = 'category_8'
+
+cat_dict = pd.read_excel(wd + '/data/processed/LCFS/Meta/lcfs_desc_anne&john.xlsx')
+ghg_list = cat_dict[[dict_cat]].drop_duplicates()[dict_cat].tolist()
+ghg_list.remove('other')
+ghg_list.remove('Other transport')
+ghg_list = [x[:10].replace('/', '').replace(' ', '') for x in ghg_list]
+
+#ghg_list = ['Carvanpu', 'Railandb', 'Flights']
 var_list = ['AI2015ln', 'lim', 'pop65', 'pop14', 'bame', 'totalwork', 'totalinc']
 
 var_list2 = ['AI2015_ln', 'lim', 'pop_65.', 'pop_14.', 'bame', 'total_work', 'total_inc']

@@ -19,7 +19,11 @@ wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 years = list(range(2007, 2018, 2))
 geog = 'MSOA'
 
-dict_cat = 'category_6'
+dict_cat = 'category_7'
+
+cat_dict = pd.read_excel(wd + '/data/processed/LCFS/Meta/lcfs_desc_anne&john.xlsx')
+cat_list = cat_dict[[dict_cat]].drop_duplicates()[dict_cat].tolist()
+cat_list.remove('other')
 
 # set font globally
 plt.rcParams.update({'font.family':'Times New Roman'})
@@ -38,7 +42,6 @@ for year in years:
     emissions[year] = pd.read_csv(wd + 'data/processed/GHG_Estimates/' + geog + '_' + year_str + '.csv', index_col=0)
 
 new_cat = {}
-cat_dict = pd.read_excel(wd + '/data/processed/LCFS/Meta/lcfs_desc_anne&john.xlsx')
 cats = cat_dict[['category']].drop_duplicates()['category']
 cat_dict['ccp_code'] = [x.split(' ')[0] for x in cat_dict['ccp']]
 cat_dict = dict(zip(cat_dict['ccp_code'], cat_dict[dict_cat]))
@@ -64,8 +67,8 @@ for year in years:
 london_data = all_data.loc[all_data['RGN11NM'] == 'London']
 london_data['year_str'] = ['Y' + str(x) for x in london_data['year']]
 
-g = sns.FacetGrid(london_data, col='year_str')
-g.map(sns.scatterplot, 'Car/van purchases and motoring oils', 'Rail and bus')
+cols = london_data.iloc[:, 1:-6].columns.tolist()
+
 
 # check for clusters of high and low
 new_data = pd.DataFrame()
@@ -75,12 +78,16 @@ for year in years:
     temp['Car_median'] = 'below 25th percentile car emissions'
     temp.loc[temp['Car/van purchases and motoring oils'] > temp['Car/van purchases and motoring oils'].quantile(0.33), 'Car_median'] = 'above 25th percentile car emissions'
 
-    temp['RB_median'] = 'Below 25th percentile rail and bus emissions'
-    temp.loc[temp['Rail and bus'] > temp['Rail and bus'].quantile(0.33), 'RB_median'] = 'Above 25th percentile rail and bus emissions'
+    temp['RB_median'] = 'Below 25th percentile rail and combined emissions'
+    temp.loc[temp['Rail & Combined'] > temp['Rail & Combined'].quantile(0.33), 'RB_median'] = 'Above 25th percentile rail and combined emissions'
+    
+    temp['Bus_median'] = 'Below 25th percentile bus emissions'
+    temp.loc[temp['Bus'] > temp['Bus'].quantile(0.33), 'Bus_median'] = 'Above 25th percentile bus emissions'
+    
     
     new_data = new_data.append(temp)
     
-summary = new_data.groupby(['year', 'Car_median', 'RB_median']).describe()[['Car/van purchases and motoring oils', 'Rail and bus']]
+summary = new_data.groupby(['year', 'Car_median', 'RB_median', 'Bus_median']).describe()[['Car/van purchases and motoring oils', 'Rail & Combined', 'Bus']]
 
 new_data['group'] = new_data['RB_median'] + ' & ' + new_data['Car_median']
 my_cols = ['#12366E', '#65A5D0', '#CAE0EF', '#C54A43'] # '#6D0021', , '#F1B593'
@@ -98,11 +105,4 @@ new_data.loc[new_data['year'] == 2015].plot(column='group', legend=True, cmap=my
 
 new_data['land transport'] = new_data['Car/van purchases and motoring oils'] + new_data['Rail and bus']
 new_data.loc[new_data['year'] == 2015].plot(column='land transport', legend=True, cmap='RdBu'); plt.show() 
-
-
-
-
-
-
-
 

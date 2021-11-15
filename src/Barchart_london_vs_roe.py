@@ -21,7 +21,7 @@ wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 years = list(range(2007, 2018, 2))
 geog = 'MSOA'
 
-dict_cat = 'category_6'
+dict_cat = 'category_8'
 
 # set font globally
 plt.rcParams.update({'font.family':'Times New Roman'})
@@ -43,6 +43,7 @@ cat_dict['ccp_code'] = [x.split(' ')[0] for x in cat_dict['ccp']]
 cat_dict = dict(zip(cat_dict['ccp_code'], cat_dict[dict_cat]))
 for year in years:
     new_cat[year] = emissions[year].rename(columns=cat_dict).sum(axis=1, level=0)
+    
 
 idx = new_cat[2017].columns.tolist(); idx.remove('other'); idx.remove('population')
 #idx = ['Private transport: Petrol, diesel, motoring oils', 'Private transport: other', 
@@ -59,7 +60,7 @@ for year in years:
     temp['RGN'] = 'London'
     temp.loc[temp['RGN11NM'] != 'London', 'RGN'] = 'Rest of England'
     all_data = all_data.append(temp)
-
+    
 
 england_avg = cp.copy(all_data)
 england_avg[idx] = england_avg[idx].apply(lambda x: x*england_avg['population'])
