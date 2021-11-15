@@ -1,17 +1,12 @@
-__pycache__/
-
-!*.md
-!LICENSE
-!*.py
-!.gitignore
+*__pycache__*
+*.DS_Store
 
 # Files in subfolders
 data/
 outputs/
-!src/
 
 # Specific files to ignore
-*_functions.py
+
 
 
 
