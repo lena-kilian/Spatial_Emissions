@@ -60,8 +60,25 @@ for year in years:
     temp['RGN'] = 'London'
     temp.loc[temp['RGN11NM'] != 'London', 'RGN'] = 'Rest of England'
     all_data = all_data.append(temp)
-    
 
+# What proportion is London of England?
+proportions = cp.copy(all_data)
+temp = ['other', 'Car/van purchases and motoring oils', 'Other transport', 'Rail', 'Bus', 'Combined fares', 'Flights']
+proportions[temp] = proportions[temp].apply(lambda x: x*proportions['population'])
+proportions = proportions.groupby(['RGN', 'year']).sum()
+temp.remove('other')
+proportions['transport_all'] = proportions[temp].sum(1)
+proportions = proportions.drop(temp, axis=1).unstack(level=0)
+for area in ['London', 'Rest of England']:
+    proportions[('total_emissions', area)] = proportions[('other', area)] + proportions[('transport_all', area)]
+l = len(proportions.columns)
+for area in ['London', 'Rest of England']:
+    proportions[('transport_proportion', area)] = proportions[('transport_all', area)] / proportions[('total_emissions', area)]
+for item in ['total_emissions', 'transport_all', 'population']:
+    proportions[(item, 'Proportion London of RoE')] = proportions[(item, 'London')] / (proportions[(item, 'London')] + proportions[(item, 'Rest of England')])
+proportions = proportions.iloc[:,l:]
+
+# Continue with plot
 england_avg = cp.copy(all_data)
 england_avg[idx] = england_avg[idx].apply(lambda x: x*england_avg['population'])
 england_avg = england_avg.groupby(['year']).sum()
@@ -151,4 +168,83 @@ plt.gca().invert_yaxis()
 plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Bar_Transport_London_vs_RoE_percent.png', bbox_inches='tight', dpi=200)
 
 
+# 2015 only percent
+summary = cp.copy(all_data)
+summary[idx] = summary[idx].apply(lambda x: x*summary['population'])
+summary = summary.groupby(['year', 'RGN']).sum()
+
+percent = summary.loc[2015,:].apply(lambda x: x/x.sum() *100).rename(columns={'population':'Population'}).T
+idx = ['Car/van purchases and motoring oils', 'Flights', 'Rail', 'Bus', 'Combined fares', 'Other transport']
+
+my_cols = ['#F1B593', '#C54A43']
+# make barcharts
+fig, ax = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(3,2))
+
+data = cp.copy(percent).loc[idx]
+start = [0 for x in range(len(data))]
+for i in range(2):
+    item = ['London', 'Rest of England'][i]
+    values = data[item]
+    ax.barh(width=values, y=data.index.tolist(), left=start, color=my_cols[i])
+    start += values
+ax.set_xlabel("% of England's tCO$_{2}$e")
+ax.axvline(x=percent.loc['Population', ['London', 'Rest of England'][0]], linestyle='--', color='k', linewidth=0.8)
+# make custom legend
+legend_elements1 = []
+for k in range(int(len(my_cols))):
+    legend_elements1.append(Line2D([k], [k], marker='o', color='w', label=data.columns[k], markerfacecolor=my_cols[k], markersize=12))
+ax.legend(handles=legend_elements1, loc='upper center', bbox_to_anchor=(1.3, 0.645), frameon=False)
+plt.gca().invert_yaxis()
+plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Bar_Transport_London_vs_RoE_percent_2.png', bbox_inches='tight', dpi=200)
+
+
+
+
+# add per capita values
+
+percent = summary.loc[2015,:].apply(lambda x: x/x.sum() *100).rename(columns={'population':'Population'}).T
+idx = ['Car/van purchases and motoring oils', 'Flights', 'Rail', 'Bus', 'Combined fares', 'Other transport']
+
+my_cols = ['#F1B593', '#C54A43']
+# make barcharts
+fig, axs = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(5,2))
+
+data = cp.copy(percent).loc[idx]
+start = [0 for x in range(len(data))]
+for i in range(2):
+    item = ['London', 'Rest of England'][i]
+    values = data[item]
+    axs[1].barh(width=values, y=data.index.tolist(), left=start, color=my_cols[i])
+    start += values
+axs[1].set_xlabel("% of England's tCO$_{2}$e per capita")
+axs[1].axvline(x=percent.loc['Population', ['London', 'Rest of England'][0]], linestyle='--', color='k', linewidth=0.8)
+
+bar_height = 0.4
+data = summary[idx].apply(lambda x: x/summary['population']).loc[2015,:].T.loc[idx]
+for i in range(2):
+    item = ['London', 'Rest of England'][i]
+    if i == 0:
+        axs[0].barh(width=data[item].tolist(), y=np.arange(len(data)) + bar_height/2, height = bar_height, color=my_cols[i])
+    else:
+        axs[0].barh(width=data[item].tolist(), y=np.arange(len(data)) - bar_height/2, height = bar_height, color=my_cols[i])
+          
+axs[0].set_xlabel("tCO$_{2}$e per capita")
+# make custom legend
+legend_elements1 = []
+for k in range(int(len(my_cols))):
+    legend_elements1.append(Line2D([k], [k], marker='o', color='w', label=data.columns[k], markerfacecolor=my_cols[k], markersize=12))
+legend_elements2 = [Line2D([2], [2], color='k', label="London's population (% of \ntotal English population)", lw=1, ls='--')]
+axs[0].legend(handles=legend_elements1, loc='upper left', bbox_to_anchor=(0, -0.35), frameon=False)
+axs[1].legend(handles=legend_elements2, loc='upper left', bbox_to_anchor=(-0.3, -0.35), frameon=False)
+
+plt.gca().invert_yaxis()
+
+plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Bar_Transport_London_vs_RoE_percent_and_absolute.png', bbox_inches='tight', dpi=200)
+
+
+
+"""
+{}
+[]
+"""
 

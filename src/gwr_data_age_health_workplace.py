@@ -161,3 +161,4 @@ new_cat_shp['lim'] = ((100-new_cat_shp['not_lim_pct']) / 100) * new_cat_shp['pop
 new_cat_shp.to_file(wd + 'data/processed/GWR_data/gwr_data_london_' + str(ghg_year) + '.shp')
 
 
+new_cat_shp.plot(column='avg_workplace_dist', legend=True)

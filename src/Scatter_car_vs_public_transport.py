@@ -19,7 +19,7 @@ wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 years = list(range(2007, 2018, 2))
 geog = 'MSOA'
 
-dict_cat = 'category_7'
+dict_cat = 'category_8'
 
 cat_dict = pd.read_excel(wd + '/data/processed/LCFS/Meta/lcfs_desc_anne&john.xlsx')
 cat_list = cat_dict[[dict_cat]].drop_duplicates()[dict_cat].tolist()

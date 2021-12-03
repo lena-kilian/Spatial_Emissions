@@ -20,24 +20,43 @@ import math
 
 data_directory = "/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis"
 
-inflation = [1.32, 1.27, 1.28, 1.22, 1.16, 1.12, 1.09, 1.06, 1.05, 1.04, 1.0]    
-    
-ghg = {}; income = {}; data = {}
-for year in range(2007, 2018):
-    # import ghg and income
-    ghg[year] = pd.read_csv(eval("r'" + data_directory + "/data/processed/GHG_Estimates/MSOA_" + str(year) + ".csv'"))
-    income[year] = pd.read_csv(eval("r'" + data_directory + "/data/processed/Income/UK_Income_MSOA_" + str(year) + ".csv'"))
-    # adjust for equivalised incomes (account for inflation)
-    #income[year]['Income anonymised'] = income[year]['Income anonymised'] * income[year]['population']
-    #total_income = income_equivalised.loc[year, 'Mean equivalised disposable income'] * income[year]['population'].sum()
-    
-    income[year]['Income anonymised'] = income[year]['Income anonymised'] *  inflation[year-2007]
-    
-    #income[year]['Income anonymised'] = ((income[year]['Income anonymised'] / income[year]['Income anonymised'].sum()) * total_income) / income[year]['population']
-    # add income and ghg to one dataset
-    data[year] = ghg[year].join(income[year][['Income anonymised']])
-    data[year]['total_ghg'] = data[year].loc[:,'1.1.1.1':'12.5.3.5'].sum(1)
+wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
+years = list(range(2007, 2018, 2))
+geog = 'MSOA'
 
+dict_cat = 'day_17'
+
+lookup = pd.read_csv(wd + 'data/raw/Geography/Conversion_Lookups/UK_full_lookup_2001_to_2011.csv')\
+    [['MSOA11CD', 'MSOA01CD', 'RGN11NM']].drop_duplicates()
+
+# import emissions
+emissions = {}
+for year in years:
+    year_difference = years[1] - years[0]
+    year_str = str(year) + '-' + str(year + year_difference - 1)
+    emissions[year] = pd.read_csv(wd + 'data/processed/GHG_Estimates/' + geog + '_' + year_str + '.csv', index_col=0)
+
+new_cat = {}
+cat_dict = pd.read_excel(wd + '/data/processed/LCFS/Meta/lcfs_desc_anne&john.xlsx')
+cats = cat_dict[['category']].drop_duplicates()['category']
+cat_dict['ccp_code'] = [x.split(' ')[0] for x in cat_dict['ccp']]
+
+idx = cat_dict[[dict_cat]].drop_duplicates()[dict_cat].tolist(); idx.remove('other')
+
+cat_dict = dict(zip(cat_dict['ccp_code'], cat_dict[dict_cat]))
+for year in years:
+    new_cat[year] = emissions[year].rename(columns=cat_dict).sum(axis=1, level=0)
+    if year < 2014:
+        new_cat[year] = new_cat[year].join(lookup.set_index('MSOA01CD')).set_index('MSOA11CD')
+    else:
+        new_cat[year] = new_cat[year].join(lookup.set_index('MSOA11CD'))
+    #new_cat[year] = new_cat[year].mean(axis=0, level=0)
+
+data = {}
+for year in years:
+    data[year] = new_cat[year].loc[(new_cat[year]['RGN11NM'] != 'Scotland') & 
+                                   (new_cat[year]['RGN11NM'] != 'Northern Ireland') & 
+                                   (new_cat[year]['RGN11NM'] != 'Wales')] 
 
 # load geog data to match with ghg (msoa level)
 msoa_2011 = gpd.read_file(eval("r'" + data_directory + "/data/raw/Geography/Shapefiles/UK/msoa_2011_uk_all.shp'")).set_index('MSOA11CD')[['geometry']]
@@ -46,13 +65,6 @@ msoa_2011 = msoa_2011.join(lookup[['MSOA01CD', 'MSOA11CD', 'RGN11NM']].drop_dupl
 uaa_lookup = pd.read_csv(eval("r'" + data_directory + "/data/raw/Geography/Conversion_Lookups/Output_Area_to_County_and_Unitary_Authority_(December_2019)_Lookup_in_England.csv'"))
 uaa_lookup = uaa_lookup.merge(lookup[['OA11CD', 'MSOA11CD']], on='OA11CD', how='left')[['MSOA11CD', 'CTYUA19NM']].drop_duplicates()
 
-
-for year in range(2007, 2018):
-    if year < 2014:
-        data[year] = msoa_2011.set_index('MSOA01CD')[['geometry', 'RGN11NM']].join(data[year].set_index('MSOA01CD'), how='right')
-    else:
-        data[year] = msoa_2011.set_index('MSOA11CD')[['geometry', 'RGN11NM']].join(data[year].set_index('MSOA11CD'), how='left')
-    data[year] = data[year].loc[(data[year]['RGN11NM'] != 'Scotland') & (data[year]['RGN11NM'] != 'Northern Ireland') & (data[year]['RGN11NM'] != 'Wales')] 
 
 # create lookup from grid data to LADs and UAAs
 # load grid data
@@ -85,6 +97,11 @@ for year in range(2007, 2018):
     all_data = all_data.append(temp)
 # match ghg to area data
 all_data = all_data.join(grid_lookup.set_index('MSOA11CD'))
+
+
+
+
+
 # aggregate from MSOA to area
 to_agg = all_data.loc[:,'1.1.1.1':'12.5.3.5'].columns.tolist() + ['Income anonymised', 'total_ghg']
 all_data[to_agg] = all_data[to_agg].apply(lambda x: x*all_data['population'])
@@ -103,4 +120,4 @@ all_data.columns = [x.split('.')[0] for x in all_data.loc[:,'1.1.1.1':'12.5.3.5'
 all_data = all_data.sum(axis=1, level=0)
 
 # save as csv
-all_data.to_csv(eval("r'" + data_directory + "/data/processed/ghg_income_uaa_lad_grid.csv'"))
+all_data.to_csv(r'/Users/lenakilian/Desktop/30daymaps/glyphmap_data_england.csv')

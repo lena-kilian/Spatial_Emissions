@@ -45,7 +45,7 @@ generate_line <- function(line_data, background_data, midpoint, margin) {
   temp <- ggplot() +
     geom_sf(data=background_data, aes(fill=year_mean), color = "#3d3d3d", size=0.05) + 
     coord_sf(crs=27700, datum=NA, clip="off")+
-    scale_fill_steps2(high="#B7736B", mid="#ffffff", low="#746BB4", midpoint=midpoint, name=expression("tCO"[2]*"e/capita")) + #  high="#A48AAE", mid="#94C9C7", low="#FAF39A",
+    scale_fill_steps2(high="#B7736B", mid="#ffffff", low="#746BB4", midpoint=midpoint, name=expression(atop("Mean", "tCO"[2]*"e/capita"))) + #  high="#A48AAE", mid="#94C9C7", low="#FAF39A",
     theme(legend.position = c(0.875, 0.22), legend.text = element_text(colour="black", size=15, family="Times New Roman"), legend.title = element_text(colour="black", size=15, family="Times New Roman"))
   plot <- temp +
     geom_point(data=line_data, aes(x=easting+x+margin, y=northing+y+margin), pch=21, alpha=0)+

@@ -120,17 +120,63 @@ names$transport_f = factor(names$transport_temp, levels=c('Cars/vans', 'Flights'
 
 all_data <- all_data %>% left_join(names, by='transport') 
 
-y_labels <- all_data %>% select(var_f, pred, predictors, predictors_f) %>% distinct() %>% arrange(var_f)
+#y_labels <- all_data %>% select(var_f, pred, predictors, predictors_f) %>% distinct() %>% arrange(var_f)
+
+# ggplot() +
+#   geom_density_ridges_gradient(data=all_data, aes(y=var_f, x=local_coeffs, fill=inc)) +
+#   scale_fill_manual(name = '', values = my_cols$colours) +
+#   scale_y_discrete(name=' ', labels = y_labels$predictors_f, breaks=y_labels$var_f) +
+#   guides(fill = guide_legend(override.aes = list(shape = 16))) + 
+#   xlab('Local Coefficient') +
+#   theme_classic() +
+#   facet_grid(. ~ transport_f, scale="free_x") +
+#   geom_vline(xintercept=c(0,0), linetype="dotted") +
+#   theme(legend.position = c('bottom'), text = element_text(colour="black", size=20, family="Times New Roman"))
+
+# ggsave(paste('Spatial_Emissions/outputs/GWR/local_coeffs_plots/ridges_all.png', sep='_'))
+
+all_data$predictors_f = factor(all_data$predictors, levels=c('Income',
+                                                             'Public Transport Density',
+                                                             'Pop. limited in day-to-day activities',
+                                                             'Pop. aged 65 or older',
+                                                             'Pop. aged 14 or younger',
+                                                             'Pop. identifying as BAME',
+                                                             'Distance to workplace'))
+
+
+y_labels <- all_data %>% select(predictors_f) %>% distinct() %>% arrange()
 
 ggplot() +
-  geom_density_ridges_gradient(data=all_data, aes(y=var_f, x=local_coeffs, fill=inc)) +
+  geom_density_ridges_gradient(data=all_data, aes(y=income_controlled, x=local_coeffs, fill=inc)) +
   scale_fill_manual(name = '', values = my_cols$colours) +
-  scale_y_discrete(name=' ', labels = y_labels$predictors_f, breaks=y_labels$var_f) +
+  scale_y_discrete(name=' ', labels = c('', '')) +
   guides(fill = guide_legend(override.aes = list(shape = 16))) + 
+  ylab('') +
   xlab('Local Coefficient') +
   theme_classic() +
-  facet_grid(. ~ transport_f, scale="free_x") +
+  facet_grid(predictors_f ~ transport_f, scale="free", switch = "y") +
+  #facet_grid(transport_f ~ predictors_f, scale="free") +
   geom_vline(xintercept=c(0,0), linetype="dotted") +
-  theme(legend.position = c('bottom'), text = element_text(colour="black", size=20, family="Times New Roman"))
+  theme(legend.position = c('bottom'), text = element_text(colour="black", size=20, family="Times New Roman"),
+        strip.text.y.left = element_text(angle = 0), strip.background = element_blank())
 
-ggsave(paste('Spatial_Emissions/outputs/GWR/local_coeffs_plots/ridges_all.png', sep='_'))
+ggsave(paste('Spatial_Emissions/outputs/GWR/local_coeffs_plots/ridges_all_2.png', sep='_'))
+
+for (item in y_labels$predictors_f){
+  temp <- all_data %>% filter(predictors_f == item)
+  ggplot() +
+    geom_density_ridges_gradient(data=temp, aes(y=inc, x=local_coeffs, fill=inc)) +
+    scale_fill_manual(name = '', values = my_cols$colours) +
+    scale_y_discrete(name=' ', labels = c(item, '')) +
+    guides(fill = guide_legend(override.aes = list(shape = 16))) + 
+    ylab('') +
+    xlab('Local Coefficient') +
+    theme_classic() +
+    facet_grid(. ~ transport_f, scale="free") +
+    #facet_grid(transport_f ~ predictors_f, scale="free") +
+    geom_vline(xintercept=c(0,0), linetype="dotted") +
+    theme(legend.position = c('bottom'), text = element_text(colour="black", size=20, family="Times New Roman"))
+  
+  ggsave(paste('Spatial_Emissions/outputs/GWR/local_coeffs_plots/ridges', item, '.png', sep='_'))
+  
+}

@@ -11,6 +11,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import geopandas as gpd
+from scipy.stats import pearsonr
 
 ghg_year = 2015 # 2017
 
@@ -91,7 +92,7 @@ ptal_2015 = ptal_2015.set_index('index')[['AI2015', 'PTAL2015', 'AI2015_ln']]
 
 # combine all with emissions data
 cat_dict = pd.read_excel(wd + '/data/processed/LCFS/Meta/lcfs_desc_anne&john.xlsx')
-cats = cat_dict[['category']].drop_duplicates()['category']
+cats = cat_dict[[dict_cat]].drop_duplicates()[dict_cat]
 cat_dict['ccp_code'] = [x.split(' ')[0] for x in cat_dict['ccp']]
 
 # save index
@@ -110,7 +111,7 @@ keep = idx + ['AI2015', 'AI2015_ln', 'pop_65+_pct', 'pop_14-_pct', 'bame_pct',  
 #for item in keep:
 #    sns.distplot(new_cat[item]); plt.show()
 
-
+# Correlations
 corr = new_cat[keep].corr().loc[idx]\
     [['AI2015_ln', 'pop_65+_pct', 'pop_14-_pct', 'bame_pct', 'lim_pct', 'avg_workplace_dist', 'income']]
     
@@ -118,6 +119,23 @@ corr_reg = new_cat[keep + ['London']].groupby('London').corr().swaplevel(axis=0)
     [['AI2015_ln', 'pop_65+_pct', 'pop_14-_pct', 'bame_pct', 'lim_pct', 'avg_workplace_dist', 'income']]
     
 corr_reg.to_csv(wd + '/Spatial_Emissions/outputs/Stats/correlation_london_roe.csv')
+
+# P-values
+def pearsonr_pval(x,y):
+    return pearsonr(x,y)[1]
+    
+corr_reg_p = new_cat[keep + ['London']].groupby('London').corr(method=pearsonr_pval).swaplevel(axis=0).loc[idx]\
+    [['AI2015_ln', 'pop_65+_pct', 'pop_14-_pct', 'bame_pct', 'lim_pct', 'avg_workplace_dist', 'income']]
+    
+for item in ['AI2015_ln', 'pop_65+_pct', 'pop_14-_pct', 'bame_pct', 'lim_pct', 'avg_workplace_dist', 'income']:
+    corr_reg_p.loc[corr_reg_p[item] >= 0.05, item] = 1
+    corr_reg_p.loc[(corr_reg_p[item] < 0.05) & (corr_reg_p[item] >= 0.01), item] = 0.05
+    corr_reg_p.loc[corr_reg_p[item] < 0.01, item] = 0.01
+
+corr_reg_p = corr_reg_p.rename(index={True:'London', False:'RoE'})
+
+corr_reg_p.to_csv(wd + '/Spatial_Emissions/outputs/Stats/correlation_pvals_london_roe.csv')
+
 
 # make scatterplot
 data = new_cat.set_index(['MSOA01CD', 'RGN11NM', 'London', 'income'], append=True)[idx].stack().reset_index()\
