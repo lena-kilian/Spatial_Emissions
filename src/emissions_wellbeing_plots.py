@@ -73,31 +73,53 @@ wellbeing = wellbeing.merge(temp, on=['Ward', 'Borough'], how='left')[wellbeing_
 # Merge datasets
 all_data = emissions.join(wellbeing.set_index('ID')[wellbeing_keep].dropna(how='all'), how='inner').drop('index', axis=1).drop_duplicates()
 
-# reverse = ['London Rank 2013 (out of 625)',
-#            'Childhood Obesity 2013', 
-#            'Incapacity Benefit rate - 2013', 
-#            'Unemployment rate 2013', 
-#            'Crime rate - 2013',
-#            'Deliberate Fires - 2013', 
-#            'Unauthorised Absence in All Schools (%) - 2013',
-#            '% dependent children in out-of-work households - 2013']
+reverse = ['London Rank 2013 (out of 625)',
+            'Childhood Obesity 2013', 
+            'Incapacity Benefit rate - 2013', 
+            'Unemployment rate 2013', 
+            'Crime rate - 2013',
+            'Deliberate Fires - 2013', 
+            'Unauthorised Absence in All Schools (%) - 2013',
+            '% dependent children in out-of-work households - 2013']
 
-# for item in reverse:
-#     if item in wellbeing.columns.tolist():
-#         print(item)
-#         wellbeing[item] = -1 * wellbeing[item]
+for item in reverse:
+    if item in wellbeing.columns.tolist():
+        print(item)
+        all_data[item] = -1 * all_data[item]
 
 
 # correlation
+all_vars_em = ['Car/van pu', 'Flights', 'Rail', 'Bus', 'Combined f', 'Total_transport', 'land_transport']
+all_vars_wb = cp.copy(wellbeing_keep)
+
+all_vars = all_vars_em + all_vars_wb
+
+corr_vars_dict = dict(zip(all_vars, [
+    # transport emissions
+    'Car/van purchases\nand motoing oils', 'Flights', 'Rail', 'Bus', 
+    'Combined fares', 'Total transport', 'Land transport', 
+    # wellbeing
+    'London Rank 2013 (reversed)', 
+    'Wellbeing Index Score\n2013', 
+    'Life Expectancy\n2009-13',
+    'Childhood Obesity\n2013 (reversed)', 
+    'Incapacity Benefit\nrate 2013 (reversed)',
+    'Unemployment rate\n2013 (reversed)', 
+    'Crime rate 2013\n(reversed)',
+    'Deliberate Fires\n2013 (reversed)', 
+    'GCSE point scores\n2013 (reversed)',
+    'Unauthorised Absence\nin All Schools\n(%) 2013 (reversed)',
+    'Dependent children\nin out-of-work\nhouseholds (%)\n2013 (reversed)',
+    'Public Transport\nAccessibility 2013',
+    'Homes with access\nto open space, nature,\nand greenspace\n(%) 2013 (reversed)',
+    'Subjective well-\nbeing average\nscore, 2013']))
+
+
 corr_vars_em = ['Car/van pu', 'Flights', 'Rail', 'Bus', 'Combined f', 'Total_transport', 'land_transport']
-corr_vars_wb = ['Index Score 2013', 'Life Expectancy 2009-13', 'Subjective well-being average score, 2013']
+corr_vars_wb = ['Index Score 2013', 'Life Expectancy 2009-13', 'Unemployment rate 2013', '% dependent children in out-of-work households - 2013', 
+                'Homes with access to open space & nature, and % greenspace - 2013', 'Subjective well-being average score, 2013']
 
 corr_vars = corr_vars_em + corr_vars_wb
-
-corr_vars_dict = dict(zip(corr_vars, ['Car/van purchases \n and motoing oils', 'Flights', 'Rail', 'Bus', 
-                                      'Combined fares', 'Total transport', 'Land transport', 
-                                      'Index Score 2013', 'Life Expectancy \n 2009-13', 
-                                      'Subjective well-being \n average score, 2013']))
 
 
 corr = all_data[corr_vars].corr(method='pearson').loc[:'land_transport', 'Index Score 2013':]
@@ -127,6 +149,7 @@ for item in corr_p.columns:
 # Categorise
 cats = all_data.drop(['Borough na', 'Ward Code', 'Ward name', 'geometry'], axis=1).T
 cats['Median'] = cats.median(1)
+#cats.loc['Index Score 2013', 'Median'] = 0
 cats = cats.iloc[:, :-1].apply(lambda x: x > cats['Median']).T
 for item in cats.columns:
     cats.loc[cats[item] == True, item] = 'High'
@@ -136,8 +159,8 @@ for item in cats.columns:
 ward = ward_shp.set_index('ID')[['geometry']].drop_duplicates().join(cats.dropna(how='all'), how='inner').dropna(how='any')
 
 
-colours = ['#CD7D7B', '#76A7CB', 'lightgrey']
-my_cols = ListedColormap(['#CD7D7B', '#76A7CB', 'lightgrey'])
+#colours = ['#CD7D7B', '#76A7CB', 'lightgrey']
+#my_cols = ListedColormap(['#CD7D7B', '#76A7CB', 'lightgrey'])
 
 # for x in ['Total_transport', 'land_transport', 'Car/van pu', 'Flights']: #, 'Car/van pu', 'Other tran', 'Rail', 'Bus', 'Combined f', 'Flights']:
 #     for y in ['Index Score 2013', 'Life Expectancy 2009-13', 'Subjective well-being average score, 2013']: #wellbeing_keep[:2] + 
@@ -148,10 +171,13 @@ my_cols = ListedColormap(['#CD7D7B', '#76A7CB', 'lightgrey'])
 #         plt.show()
 
 
+colours = ['#B75248', '#E8B798', '#1C356A', '#74A3CC']
+my_cols = ListedColormap(colours)
+
 plot_data = cats[corr_vars_em].stack().reset_index(level=1).rename(columns={'level_1':'Emissions', 0:'Emissions_Score'})
 plot_data = plot_data.join(cats[corr_vars_wb].stack().reset_index(level=1).rename(columns={'level_1':'Wellbeing', 0:'Wellbeing_Score'}))
 plot_data['Category'] = plot_data['Emissions_Score'] + ' emissions - ' + plot_data['Wellbeing_Score'] + ' wellbeing' 
-plot_data.loc[plot_data['Emissions_Score'] == plot_data['Wellbeing_Score'], 'Category'] = 'Other'
+#plot_data.loc[plot_data['Emissions_Score'] == plot_data['Wellbeing_Score'], 'Category'] = 'Other'
 plot_data = ward_shp.set_index('ID')[['geometry']].drop_duplicates().join(plot_data).sort_values('Category')
 
 
@@ -184,10 +210,10 @@ for i in range(r):
         if j == 0:
             axs[i, j].set_ylabel(yax)
 # make custom legend
-for k in range(3):
+for k in range(len(colours)):
     legend_elements = [Line2D([k], [k], label=plot_data[['Category']].drop_duplicates()['Category'].tolist()[k], 
                                    markerfacecolor=colours[k], marker='o', color='w',  markersize=4*font_size)]
-    axs[r-1, int((c+1)/2)+k-2].legend(handles=legend_elements, loc='lower left', frameon=False,
+    axs[r-1, int((c+1)/2)+k-3].legend(handles=legend_elements, loc='lower left', frameon=False,
                                       bbox_to_anchor=((k-1)*(font_size*0.1), -size*0.1))
 
 plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing_Emission_Maps.png', bbox_inches='tight', dpi=200)

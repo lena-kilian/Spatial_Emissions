@@ -149,3 +149,4 @@ for i in range(2):
         temp = data.loc[(data['London'] == reg) & (data['Transport Mode'] == tm)]
         sns.scatterplot(ax=axs[i, j], data=temp, x='Income', y='tCO2e per capita')
         axs[i, j].set_ylim(-0.1, [3, 2.5, 0.6, 0.2, 0.2, 2.5][j])
+

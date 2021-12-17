@@ -90,6 +90,9 @@ summary[idx] = summary[idx].apply(lambda x: x*summary['population'])
 summary = summary.groupby(['year', 'RGN']).sum()
 summary = summary[idx].apply(lambda x: x/summary['population'])
 
+min_emissions = all_data.groupby(['year', 'RGN']).min()
+max_emissions = all_data.groupby(['year', 'RGN']).max()
+
 # make colourbar
 #max_col = 200
 #cmap = cm.get_cmap('RdBu')
@@ -216,7 +219,7 @@ for i in range(2):
     values = data[item]
     axs[1].barh(width=values, y=data.index.tolist(), left=start, color=my_cols[i])
     start += values
-axs[1].set_xlabel("% of England's tCO$_{2}$e per capita")
+axs[1].set_xlabel("% of England's tCO$_{2}$e")
 axs[1].axvline(x=percent.loc['Population', ['London', 'Rest of England'][0]], linestyle='--', color='k', linewidth=0.8)
 
 bar_height = 0.4
