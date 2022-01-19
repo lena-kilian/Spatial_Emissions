@@ -249,7 +249,7 @@ ggplot() +
   # add global coef.
   geom_point(data = global_coef_fig, aes(y=transport_f, x=global_coef, fill=global_pval_f),
              colour="black", pch=21, size = 5, inherit.aes = FALSE) +
-  scale_fill_manual(values=colour$pval_cols, name='Global p-value') +
+  scale_fill_manual(values=colour$pval_cols, name='Global coef.') +
   geom_text(aes(x=-1.6*4, y=labels$transport_f, label=labels$AIC), 
             colour="black", size=9, family="Times New Roman") +
   geom_text(aes(x=-3*4, y=labels$transport_f, label=labels$transport_f), 
@@ -282,7 +282,7 @@ for (i in seq(1, length(transport_list$transport))){
     # add global coef.
     geom_point(data = global_coef_fig, aes(y=predictors_f, x=global_coef, fill=global_pval_f),
                colour="black", pch=21, size = 5, inherit.aes = FALSE) +
-    scale_fill_manual(values=colour$pval_cols, name='Global p-value') +
+    scale_fill_manual(values=colour$pval_cols, name='Global coef.') +
     # CHANGE FONT!!
     geom_text(aes(x=-1.35*limit_list[i], y=labels$predictors_f, label=labels$AIC), 
               colour="black", size=9, family="Times New Roman")  +
