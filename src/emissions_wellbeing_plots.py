@@ -146,11 +146,23 @@ def pearsonr_pval(x,y):
     return pearsonr(x,y)[1]
     
 corr_p = all_data[corr_vars].corr(method=pearsonr_pval)
+
+corr_p2 = all_data[corr_vars].corr(method=pearsonr_pval)
+for item in corr_p.columns:
+    corr_p2.loc[corr_p[item] >= 0.05, item] = '  '
+    corr_p2.loc[(corr_p[item] < 0.05) & (corr_p[item] >= 0.01), item] = '* '
+    corr_p2.loc[corr_p[item] < 0.01, item] = "**"
     
 for item in corr_p.columns:
     corr_p.loc[corr_p[item] >= 0.05, item] = 1
     corr_p.loc[(corr_p[item] < 0.05) & (corr_p[item] >= 0.01), item] = 0.05
     corr_p.loc[corr_p[item] < 0.01, item] = 0.01
+    
+
+corr_summary = cp.copy(corr)
+for item in corr_summary.columns:
+    corr_summary[item] = [str(np.round(corr_summary[item][x], 2)) + ' ' + corr_p2[item][x] for x in range(len(corr_summary[item]))]
+
 
 
 #########
@@ -169,11 +181,15 @@ q = count_w.loc[:, 'Car/van pu':'Subjective well-being average score, 2013'].sta
 
 # plot
 for item in ['Car/van pu', 'Bus', 'Combined f', 'land_transport', 'Index Score 2013', 'Subjective well-being average score, 2013']:
-    temp = q.loc[item,:].tolist()
-    count_w[item + '_Group'] = 'Q1'
-    for i in range(3):
-        group = ['Q2', 'Q3', 'Q4'][i]
-        count_w.loc[count_w[item] > temp[i], item + '_Group'] = group
+    n = int(round(len(count_w) / 4))
+    k = ['Q1'] * n + ['Q2'] * n + ['Q3'] * n + ['Q4'] * n
+    if len(count_w) > len(k):
+        for i in len(count_w) - len(k):
+            k += ['Q4']
+    else:
+        k = k[:len(count_w)]
+    count_w = count_w.sort_values(item, ascending=True)
+    count_w[item + '_Group'] = k
 
 temp = count_w.loc[:, 'Car/van pu_Group':]
 temp['count'] = 1
@@ -185,7 +201,7 @@ for w in ['Index Score 2013_Group', 'Subjective well-being average score, 2013_G
         count_final = temp.groupby([e, w]).count()[['count']].unstack().rename(columns={'count':w})
         count_final = count_final.apply(lambda x: x/count_final.sum().sum() * 100)
         count_final.index = pd.MultiIndex.from_arrays([[e] * 4, count_final.index])
-        count_final.index.names = ['t=Transport', 'Group']
+        count_final.index.names = ['Transport', 'Group']
         temp_results = temp_results.append(count_final)
     if w == 'Index Score 2013_Group':
         count_results = cp.copy(temp_results)
@@ -205,6 +221,53 @@ for y in ['Car/van pu', 'Bus']: #'Total_transport', 'Car/van pu', 'Other tran', 
          plt.axvline(all_data[x].median(), c='r'); plt.axhline(all_data[y].median(), c='r')
          plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/' + y.replace('/', '') + '_' + x.replace('/', '') + '.png', dpi=200,
                      bbox_inches='tight')
+
+font_size = 18
+temp = all_data.rename(columns={'Car/van pu':'Car/van purchases and motoring oils', 'Combined f':'Combined Fares'})
+corr_summary = corr_summary.rename(columns={'Car/van pu':'Car/van purchases and motoring oils', 'Combined f':'Combined Fares'})
+for y in ['Index Score 2013', 'Subjective well-being average score, 2013']:
+    for x in ['Car/van purchases and motoring oils', 'Bus', 'Combined Fares']:
+        plt.rcParams.update({'font.family':'Times New Roman', 'font.size':font_size, 
+                             'axes.labelsize':font_size, 'axes.titlesize':font_size})
+        fig, ax = plt.subplots(figsize=(5, 5))
+        sns.regplot(ax=ax, data=temp, x=x, y=y, color='#5d5d5d', scatter_kws={'s':3.5})
+        if y == 'Index Score 2013':
+            pos_y = 15
+        else:
+            pos_y = 8.35
+        ax.text(temp[x].min(), pos_y, "Pearson's r = " + corr_summary.loc[y, x])
+        ax.set_xlabel(''), ax.set_ylabel('')
+        plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/Regplot_' + y.replace('/', '') + '_' + x.replace('/', '') + '.png', 
+                dpi=200, bbox_inches='tight')
+        
+font_size = 18
+temp = all_data.rename(columns={'Car/van pu':'Car/van purchases and motoring oils', 'Combined f':'Combined Fares', 
+                                'population':'Population (1,000)'})
+corr_summary = corr_summary.rename(columns={'Car/van pu':'Car/van purchases and motoring oils', 'Combined f':'Combined Fares'})
+for y in ['Index Score 2013', 'Subjective well-being average score, 2013']:
+    for x in ['Car/van purchases and motoring oils', 'Bus', 'Combined Fares']:
+        plt.rcParams.update({'font.family':'Times New Roman', 'font.size':font_size, 
+                             'axes.labelsize':font_size, 'axes.titlesize':font_size})
+        fig, ax = plt.subplots(figsize=(5, 5))
+        sns.scatterplot(ax=ax, data=temp, x=x, y=y, hue='Population (1,000)', palette='Blues', edgecolor='black', legend=False)
+        if y == 'Index Score 2013':
+            pos_y = 15
+        else:
+            pos_y = 8.35
+        ax.text(temp[x].min(), pos_y, "Pearson's r = " + corr_summary.loc[y, x])
+        ax.set_xlabel(''), ax.set_ylabel('')
+        
+        plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/Colplot_' + y.replace('/', '') + '_' + x.replace('/', '') + '.png', 
+                dpi=200, bbox_inches='tight')
+        
+plt.rcParams.update({'font.family':'Times New Roman', 'font.size':font_size, 
+                             'axes.labelsize':font_size, 'axes.titlesize':font_size})
+fig, ax = plt.subplots(figsize=(5, 5))
+sns.scatterplot(ax=ax, data=temp, x=x, y=y, hue='Population (1,000)', palette='Blues', edgecolor='black')
+ax.legend(loc='center left', title='Population (1,000)', bbox_to_anchor=(1, 0.5), ncol=1)
+plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/Colplot_legend.png', 
+                dpi=200, bbox_inches='tight')
+
 
 ########
 # MAPS #
@@ -301,17 +364,20 @@ for i in range(r):
                     bbox_inches='tight', pad_inches=-0.1)
         
         
-
-em = 'Car/van pu'
-wb = 'Index Score 2013'
+ 
 
 # individual pictures
-fig, ax = plt.subplots(figsize=(5, 5))
-temp = plot_data.loc[(plot_data['Emissions'] == em) & (plot_data['Wellbeing'] == wb)]
-temp.plot(ax=ax, column='Category', cmap=my_cols)
-plt.axis('off')
-#plt.subplots_adjust(left=1.5, right=3, top=0.9, bottom=0.1)
-plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Maps/' + em.replace('/', '') + '_' + wb + '.png', dpi=200,
-            bbox_inches='tight', pad_inches=-0.1)
+carvan_data = plot_data.loc[(plot_data['Emissions'] == 'Car/van pu')].drop_duplicates()
 
+# individual pictures
+for wb in corr_vars_wb:
+    fig, ax = plt.subplots(figsize=(5, 5))
+    temp = carvan_data.loc[(carvan_data['Wellbeing'] == wb)]
+    temp.plot(ax=ax, column='Category', cmap=my_cols)
+    #hide axes
+    plt.axis('off')
+    plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Maps/Carvan pu_' + wb + '.png', dpi=200,
+                bbox_inches='tight', pad_inches=-0.1)
+        
+        
 
