@@ -237,7 +237,7 @@ labels <- temp %>% select(transport_f, AIC) %>% distinct() %>% arrange(transport
   mutate(AIC = paste(round(AIC, 0)))
 ggplot() +
   geom_density_ridges_gradient(data=temp, aes(y=transport_f, x=local_coeffs), fill="lightgray") + # "#F1B593" "#C54A43"
-  scale_y_discrete(limits = rev(levels(temp$transport_f)), position = "right") + 
+  scale_y_discrete(limits = rev(levels(temp$transport_f))) + #, position = "right") + 
   guides(fill = guide_legend(override.aes = list(shape = 16))) +
   ylab('') +
   xlab(' ') +
@@ -250,12 +250,12 @@ ggplot() +
   geom_point(data = global_coef_fig, aes(y=transport_f, x=global_coef, fill=global_pval_f),
              colour="black", pch=21, size = 5, inherit.aes = FALSE) +
   scale_fill_manual(values=colour$pval_cols, name='Global coef.') +
-  geom_text(aes(x=-1.6*4, y=labels$transport_f, label=labels$AIC), 
-            colour="black", size=9, family="Times New Roman") +
-  geom_text(aes(x=-3*4, y=labels$transport_f, label=labels$transport_f), 
-            colour="black", size=9, family="Times New Roman", hjust = 0) +
+  #geom_text(aes(x=-1.6*4, y=labels$transport_f, label=labels$AIC), 
+  #          colour="black", size=9, family="Times New Roman") +
+  #geom_text(aes(x=-3*4, y=labels$transport_f, label=labels$transport_f), 
+  #          colour="black", size=9, family="Times New Roman", hjust = 0) +
   theme(text = element_text(colour="black", size=30, family="Times New Roman"),
-        plot.margin = unit(c(0, 0, 0, 25), "lines"))
+        plot.margin = unit(c(0, 0, 0, 0), "lines"))
 ggsave('Spatial_Emissions/outputs/GWR/local_coeffs_plots/ridges_incomeonly.png')
 
 
@@ -271,7 +271,7 @@ for (i in seq(1, length(transport_list$transport))){
     mutate(AIC = paste(round(AIC, 0)))
   ggplot() +
     geom_density_ridges_gradient(data=temp, aes(y=predictors_f, x=local_coeffs), fill="lightgray") + # "#F1B593" "#C54A43"
-    scale_y_discrete(limits = rev(levels(temp$predictors_f)[2:7]), position = "right") + 
+    scale_y_discrete(limits = rev(levels(temp$predictors_f)[2:7])) + #, position = "right") + 
     ylab('') +
     xlab(' ') +
     xlim(-3*limit_list[i], limit_list[i]) +
@@ -284,11 +284,11 @@ for (i in seq(1, length(transport_list$transport))){
                colour="black", pch=21, size = 5, inherit.aes = FALSE) +
     scale_fill_manual(values=colour$pval_cols, name='Global coef.') +
     # CHANGE FONT!!
-    geom_text(aes(x=-1.35*limit_list[i], y=labels$predictors_f, label=labels$AIC), 
-              colour="black", size=9, family="Times New Roman")  +
-    geom_text(aes(x=-2.6*limit_list[i], y=labels$predictors_f, label=labels$predictors_f), 
-              colour="black", size=9, family="Times New Roman", hjust = 0) +
+    #geom_text(aes(x=-1.35*limit_list[i], y=labels$predictors_f, label=labels$AIC), 
+    #          colour="black", size=9, family="Times New Roman")  +
+    #geom_text(aes(x=-2.6*limit_list[i], y=labels$predictors_f, label=labels$predictors_f), 
+    #          colour="black", size=9, family="Times New Roman", hjust = 0) +
     theme(text = element_text(colour="black", size=30, family="Times New Roman"),
-          plot.margin = unit(c(1, 0, 0, 30), "lines"))
+          plot.margin = unit(c(1, 0, 0, 0), "lines"))
   ggsave(paste('Spatial_Emissions/outputs/GWR/local_coeffs_plots/ridges', removePunctuation(item), '.png', sep='_'))
 }

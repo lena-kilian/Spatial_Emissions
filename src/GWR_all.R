@@ -14,11 +14,34 @@ setwd('~/Documents/Ausbildung/UoLeeds/PhD/Analysis/')
 # -------------------------------------------
 yr <- 2015
 
+n <- 5
+style <- "kmeans"
+
 shp_data <- read_sf(paste('data/processed/GWR_data/gwr_data_london_', yr, '.shp', sep='')) %>%
   st_transform(CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +units=m +no_defs")) %>%
   mutate(total_inc = income * population / 1000, 
          total_work = avg_workpl * population / 10,
          MSOA11CD = index)
+
+# Plot transport density
+map <- tm_shape(shp_data) +
+  tm_fill('AI2015_ln', style = style, n=n, title="Pub. Transport Density") + 
+  tm_style("col_blind") +
+  tm_borders(lwd = 0.1) +
+  tm_layout(frame = F,
+            legend.position = c(0.8, 0), legend.title.size = 1.8, legend.title.fontfamily="Times New Roman",
+            legend.text.size = 1.5, legend.text.fontfamily="Times New Roman", outer.margins=c(0, 0, 0, 0.1))
+tmap_save(map, 'Spatial_Emissions/outputs/GWR/maps/AI2015ln.png')
+
+map <- tm_shape(shp_data) +
+  tm_fill('PTAL2015', title="Pub. Transport Density") + 
+  tm_style("col_blind") +
+  tm_borders(lwd = 0.1) +
+  tm_layout(frame = F,
+            legend.position = c(0.8, 0), legend.title.size = 1.8, legend.title.fontfamily="Times New Roman",
+            legend.text.size = 1.5, legend.text.fontfamily="Times New Roman", outer.margins=c(0, 0, 0, 0.1))
+tmap_save(map, 'Spatial_Emissions/outputs/GWR/maps/PTAL2015.png')
+
 
 # -------------------------------------------
 # 2017 by products
@@ -56,7 +79,7 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     
     # map local coef
     map <- tm_shape(gwr_sf) +
-      tm_fill('predictor', midpoint = 0, style = "quantile", n=5, title="Local Coefficients") + 
+      tm_fill('predictor', midpoint = 0, style = style, n=n, title="Local Coefficients") + 
       tm_style("col_blind") +
       tm_borders(lwd = 0.1) +
       tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.999), title.size = 0.5,
@@ -116,7 +139,7 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     
     # map local coef
     map <- tm_shape(gwr_sf) +
-      tm_fill('predictor', midpoint = 0, style = "quantile", n=5, title="Local Coefficients") + 
+      tm_fill('predictor', midpoint = 0, style = style, n=n, title="Local Coefficients") + 
       tm_style("col_blind") +
       tm_borders(lwd = 0.1) +
       tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.999), title.size = 0.5,
@@ -126,7 +149,7 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
                          '_', str_replace_all(variable, "[^[:alnum:]]", ""), '_',  yr, '_w-inc.png', sep='')) 
     
     map <- tm_shape(gwr_sf) +
-      tm_fill('total_inc', midpoint = 0, style = "quantile", n=5, title="Local Coefficients") + 
+      tm_fill('total_inc', midpoint = 0, style = style, n=n, title="Local Coefficients") + 
       tm_style("col_blind") +
       tm_borders(lwd = 0.1) +
       tm_layout(frame = F, title=paste(product, variable, 'INCOME', sep='_'), title.position = c(0, 0.999), title.size = 0.5,
@@ -189,7 +212,7 @@ for (product in product_list){
     
     # map local coef
     map <- tm_shape(gwr_sf) +
-      tm_fill('predictor', midpoint = 0, style = "quantile", n=5, title="Local Coefficients") + 
+      tm_fill('predictor', midpoint = 0, style = style, n=n, title="Local Coefficients") + 
       tm_style("col_blind") +
       tm_borders(lwd = 0.1) +
       tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.999), title.size = 0.5,

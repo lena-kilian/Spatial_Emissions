@@ -361,7 +361,7 @@ plot_data = temp
 ccp_labels = ['Food & Drinks', 'Alcohol & Tobacco', 'Clothing & Footwear', 'Housing', 'Furnishings', 'Health', 'Transport', 'Communication', 'Recreation & Culture', 
               'Education', 'Restaurants & Hotels', 'Miscellaneous']
 ccp1_dict = dict(zip([str(x) for x in range(1,13)], ccp_labels))
-product_year = temp.stack().reset_index(); product_year.columns = ['Year', 'Product/Service (COICOP 1)', 'tCO2e per capita']
+product_year = temp.stack().reset_index(); product_year.columns = ['Year', 'Product/Service (COICOP 1)', 'tCO$_{2}$e per capita']
 product_year['Year'] = product_year['Year'].astype(int)
 income_year = product_year.loc[product_year['Product/Service (COICOP 1)'] == 'Income anonymised']; income_year.columns = ['Year', 'Income', 'Mean income']
 product_year = product_year.loc[product_year['Product/Service (COICOP 1)'] != 'Income anonymised']
@@ -374,7 +374,7 @@ ccp1_corr = pd.DataFrame(save.groupby('year').corr()[['Income anonymised']]).joi
 ccp1_corr = ccp1_corr.loc[(ccp1_corr['ccp1'] != 'Income anonymised') & (ccp1_corr['ccp1'] != 'total ghg')]
 ccp1_corr['Product'] = ccp1_corr['ccp1'].map(ccp1_dict)
 fig, ax = plt.subplots(figsize=(15, 10)); sns.scatterplot(data=ccp1_corr, x='ghg', y='pearson_r', hue='Product', size='year', palette='colorblind');
-ax.set_xlabel('tCO2e per capita (UK mean)'); ax.set_ylabel('Correlation Coefficient'); ax.set_xlim(0, 5)
+ax.set_xlabel('tCO$_{2}$e per capita (UK mean)'); ax.set_ylabel('Correlation Coefficient'); ax.set_xlim(0, 5)
 plt.savefig(eval("r'" + output_directory + "/outputs/Graphs/ghg_pearson_scatter.png'"), bbox_inch='tight', dpi=150)
 
 
@@ -414,14 +414,14 @@ plot_data = temp
 
 product_year = product_year.loc[product_year['Product/Service (COICOP 1)'] != 'Income anonymised']
 
-sns.lineplot(data=product_year, x='Year', y='tCO2e per capita', hue='Product/Service (COICOP 1)', palette='colorblind'); plt.show();
+sns.lineplot(data=product_year, x='Year', y='tCO$_{2}$e per capita', hue='Product/Service (COICOP 1)', palette='colorblind'); plt.show();
 
 # Creating plot with dataset_1
 fig, ax1 = plt.subplots(figsize=(12,8)) 
 # ghg
-sns.lineplot(data=product_year, x='Year', y='tCO2e per capita', hue='Product/Service (COICOP 1)', palette="Paired", ax=ax1, legend=False);
+sns.lineplot(data=product_year, x='Year', y='tCO$_{2}$e per capita', hue='Product/Service (COICOP 1)', palette="Paired", ax=ax1, legend=False);
 ax1.set_xlabel('Year') 
-ax1.set_ylabel('tCO2e per capita', color = 'k') 
+ax1.set_ylabel('tCO$_{2}$e per capita', color = 'k') 
 ax1.set_ylim(0, 6)
 #plt.savefig(eval("r'" + output_directory + "/outputs/GISRUK_legend.png'"), bbox_inch='tight', dpi=150)
 # Adding Twin Axes to plot using dataset_2
@@ -439,16 +439,16 @@ plt.show();
 # set seaborn style
 fig, ax1 = plt.subplots(figsize=(12,8)) 
 # ghg
-sns.lineplot(data=product_year, x='Year', y='tCO2e per capita', hue='Product/Service (COICOP 1)', palette="Paired", ax=ax1, legend=False);
+sns.lineplot(data=product_year, x='Year', y='tCO$_{2}$e per capita', hue='Product/Service (COICOP 1)', palette="Paired", ax=ax1, legend=False);
 for item in ['Housing', 'Transport', 'Food & Drinks', 'Recreation & Culture', 'Restaurants & Hotels']:
-    y = product_year.loc[(product_year['Product/Service (COICOP 1)'] == item) & (product_year['Year'] <= 2008)]['tCO2e per capita'].tolist()
+    y = product_year.loc[(product_year['Product/Service (COICOP 1)'] == item) & (product_year['Year'] <= 2008)]['tCO$_{2}$e per capita'].tolist()
     if y[0] < y[1]:
         y = y[0] + 0.25
     else:
         y = y[0]
     ax1.text(x=2007.25, y=y, s=item)
 ax1.set_xlabel('Year') 
-ax1.set_ylabel('tCO2e per capita', color = 'k') 
+ax1.set_ylabel('tCO$_{2}$e per capita', color = 'k') 
 ax1.set_ylim(0, 6)
 #plt.savefig(eval("r'" + output_directory + "/outputs/GISRUK_legend.png'"), bbox_inch='tight', dpi=150)
 # Adding Twin Axes to plot using dataset_2
@@ -475,7 +475,7 @@ ax1.text(x=2007.25, y=0.5, s='Food & Drinks')
 ax1.text(x=2007.25, y=3.75, s='Housing')
 ax1.text(x=2007.25, y=8, s='Transport')
 ax1.set_xlabel('Year') 
-ax1.set_ylabel('tCO2e per capita', color = 'k') 
+ax1.set_ylabel('tCO$_{2}$e per capita', color = 'k') 
 ax1.set_ylim(0, 16)
 ax2.set_xlim(2007, 2017)
 # Adding Twin Axes to plot using dataset_2
@@ -687,7 +687,7 @@ fig, ax1 = plt.subplots(figsize=(5,6.5))
 uss_ghg.sort_values('datetime').set_index('date')[['predict']].plot.bar(cmap='Paired', ax=ax1, legend=False)
 #ax1.legend(fontsize=10, ncol=4)
 ax1.set_xlabel('') 
-ax1.set_ylabel('tCO2e per capita', color = '#00698b') 
+ax1.set_ylabel('tCO$_{2}$e per capita', color = '#00698b') 
 ax1.set_ylim(0, 10)
 # Adding Twin Axes to plot using dataset_2
 ax2 = ax1.twinx() 
@@ -729,11 +729,11 @@ econ_msoa = econ_msoa.drop(('test', 'test'), axis=1)
 
 temp = econ_msoa.sum(axis=1, level=0)
 
-temp = econ_msoa.stack(level=[0,1]).reset_index(); temp.columns=['MSOA', 'year', 'Product/Service', 'tCO2e per capita']
+temp = econ_msoa.stack(level=[0,1]).reset_index(); temp.columns=['MSOA', 'year', 'Product/Service', 'tCO$_{2}$e per capita']
 temp['Product/Service'] = temp['Product/Service'].map(ccp1_dict)
 
 fig, ax=plt.subplots(figsize=(7,4))
-sns.boxplot(ax=ax, data=temp, hue='year', y='tCO2e per capita', x='Product/Service', palette='Paired'); #ax.set_xscale('log')
+sns.boxplot(ax=ax, data=temp, hue='year', y='tCO$_{2}$e per capita', x='Product/Service', palette='Paired'); #ax.set_xscale('log')
 
 
 sns.lmplot(data=all_data, x='Income anonymised', y='total_ghg', hue='year')
@@ -818,22 +818,22 @@ plot.loc[:,'1':].rename(columns=ccp1_dict).plot(cmap='Paired')
 
     
 plot3 = plot.set_index(('baseline', 'baseline', 'msoa_decile')).drop(['level_0', 'level_1'], axis=1).stack().reset_index()
-plot3.columns = ['Income Decile', 'Product/Service', 'tCO2e per capita']
+plot3.columns = ['Income Decile', 'Product/Service', 'tCO$_{2}$e per capita']
 plot3['Product / Service'] = plot3['Product/Service'].map(ccp1_dict)
 
-sns.lineplot(data=plot3, x='Income Decile', y='tCO2e per capita', hue='Product / Service', palette='Paired'); #plt.yscale('log')
+sns.lineplot(data=plot3, x='Income Decile', y='tCO$_{2}$e per capita', hue='Product / Service', palette='Paired'); #plt.yscale('log')
 
-temp = plot3.groupby('Product/Service').mean()[['tCO2e per capita']]; temp.columns=['mean']
+temp = plot3.groupby('Product/Service').mean()[['tCO$_{2}$e per capita']]; temp.columns=['mean']
 
 plot3=plot3.merge(temp.reset_index(), on='Product/Service')
 fig, ax = plt.subplots(figsize=(15, 10))
-sns.barplot(ax=ax, data=plot3.sort_values('mean'), x='Income Decile', y='tCO2e per capita', hue='Product / Service', palette='Paired')
+sns.barplot(ax=ax, data=plot3.sort_values('mean'), x='Income Decile', y='tCO$_{2}$e per capita', hue='Product / Service', palette='Paired')
  
 fig, ax = plt.subplots(figsize=(7.5, 5))
-sns.barplot(ax=ax, data=plot3.sort_values('mean'), hue='Income Decile', x='tCO2e per capita', y='Product / Service', palette='Paired_r')
+sns.barplot(ax=ax, data=plot3.sort_values('mean'), hue='Income Decile', x='tCO$_{2}$e per capita', y='Product / Service', palette='Paired_r')
   
 fig, ax = plt.subplots(figsize=(15, 5))
-sns.barplot(ax=ax, data=plot3.sort_values('mean'), hue='Income Decile', y='tCO2e per capita', x='Product / Service', palette='Paired')
+sns.barplot(ax=ax, data=plot3.sort_values('mean'), hue='Income Decile', y='tCO$_{2}$e per capita', x='Product / Service', palette='Paired')
 plt.xticks(rotation=90);
 plt.savefig(eval("r'" + output_directory + "/outputs/Graphs/income_decile_2017_ghg.png'"), bbox_inches='tight', dpi=150)
 

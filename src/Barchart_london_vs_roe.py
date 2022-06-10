@@ -16,7 +16,6 @@ from matplotlib.lines import Line2D
 from matplotlib import rc
 
 
-
 wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 years = list(range(2007, 2018, 2))
 geog = 'MSOA'
