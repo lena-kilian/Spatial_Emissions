@@ -28,7 +28,7 @@ var_list = ['AI2015ln', 'lim', 'pop65', 'pop14', 'bame', 'totalwork', 'totalinc'
 
 var_list2 = ['AI2015_ln', 'lim', 'pop_65.', 'pop_14.', 'bame', 'total_work', 'total_inc']
 
-model_fit = ['RSS.gw', 'AIC', 'AICc', 'enp', 'edf', 'gw.R2', 'gwR2.adj', 'BIC']
+model_fit = ['RSS.gw', 'AIC', 'AICc', 'enp', 'edf', 'gw.R2', 'gwR2.adj', 'BIC', 'lmR2', 'lmR2.adj', 'lmAIC']
 global_results = {}
 for ghg in ghg_list:
     for var in var_list:
@@ -75,9 +75,9 @@ for ghg in ghg_list:
 all_results = all_results.dropna(how='all')
 
 # Make tidy table
-check = all_results.loc[['Max.', 'Min.', 'Median', 'Global Estimate', 'Global pval', 'Global tval']].swaplevel(axis=0).loc['predictor']
+check = all_results.loc[['Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.', 'Global Estimate', 'Global pval', 'Global tval']].swaplevel(axis=0).loc['predictor']
         
-check = all_results.loc[['Max.', 'Min.', 'Median', 'Global Estimate', 'Global pval', 'Global tval', 'Model fit']].T    
+check = all_results.loc[['Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.', 'Global Estimate', 'Global pval', 'Global tval', 'Model fit']].T    
      
 
 for item in check['Global pval'].columns.tolist():
@@ -88,13 +88,14 @@ for item in check['Global pval'].columns.tolist():
 
 keep = [# Model fit
         ('Model fit', 'AIC'), ('Model fit', 'gwR2.adj'),
+        ('Model fit', 'lmAIC'), ('Model fit', 'lmR2.adj'),
         # Global coefficients w7 pvalues
         ('Global Estimate', 'predictor'), ('Global pval str', 'predictor'),
         ('Global Estimate', 'Intercept'), ('Global pval str', 'Intercept'),
         ('Global Estimate', 'population'), ('Global pval str', 'population'),
         ('Global Estimate', 'total_inc'), ('Global pval str', 'total_inc'),
         # Local coefficient summary (predictor only)
-        ('Min.', 'predictor'), ('Median', 'predictor'), ('Max.', 'predictor')
+        ('Min.', 'predictor'), ('1st Qu.', 'predictor'), ('Median', 'predictor'), ('3rd Qu.', 'predictor'), ('Max.', 'predictor')
         ]
 
 check = check[keep]

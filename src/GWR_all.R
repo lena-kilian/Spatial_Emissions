@@ -7,6 +7,7 @@ library(tmap)
 library(lsr)
 library(broom)
 library(maps)
+library(stats)
 
 setwd('~/Documents/Ausbildung/UoLeeds/PhD/Analysis/')
 # -------------------------------------------
@@ -97,6 +98,10 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     tab <- rbind(apply(m.gwr$SDF@data[, 1:3], 2, summary), temp) 
     
     temp2 <- data.frame(m.gwr$GW.diagnostic %>% as_tibble())
+    # get lm r squared and AIC
+    temp2$lmR2 <- summary(m.gwr$lm)$r.squared
+    temp2$lmR2.adj <- summary(m.gwr$lm)$adj.r.squared
+    temp2$lmAIC <- AIC(m.gwr$lm)
     rownames(temp2) <- c("Global")
     
     tab <- tab %>% cbind(temp2) %>% round(3)
@@ -169,6 +174,11 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
     tab <- rbind(apply(m.gwr$SDF@data[, 1:4], 2, summary), temp) 
 
     temp2 <- data.frame(m.gwr$GW.diagnostic %>% as_tibble())
+    # get lm r squared and AIC
+    temp2$lmR2 <- summary(m.gwr$lm)$r.squared
+    temp2$lmR2.adj <- summary(m.gwr$lm)$adj.r.squared
+    temp2$lmAIC <- AIC(m.gwr$lm)
+    # Add rowname
     rownames(temp2) <- c("Global")
     
     tab <- tab %>% cbind(temp2) %>% round(3) 
@@ -232,7 +242,12 @@ for (product in product_list){
     tab <- rbind(apply(m.gwr$SDF@data[, 1:4], 2, summary), temp) 
     
     temp2 <- data.frame(m.gwr$GW.diagnostic %>% as_tibble())
+    # get lm r squared and AIC
+    temp2$lmR2 <- summary(m.gwr$lm)$r.squared
+    temp2$lmR2.adj <- summary(m.gwr$lm)$adj.r.squared
+    temp2$lmAIC <- AIC(m.gwr$lm)
     rownames(temp2) <- c("Global")
+    
     
     tab <- tab %>% cbind(temp2) %>% round(3) 
     colnames(tab)[2] <- variable

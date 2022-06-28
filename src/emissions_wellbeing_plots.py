@@ -17,6 +17,7 @@ import seaborn as sns
 import copy as cp
 from scipy.stats import pearsonr
 import numpy as np
+from matplotlib.patches import Rectangle
 
 wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 
@@ -213,32 +214,59 @@ for w in ['Index Score 2013_Group', 'Subjective well-being average score, 2013_G
 # SCATTERPLOT #
 ###############
 
-for y in ['Car/van pu', 'Bus']: #'Total_transport', 'Car/van pu', 'Other tran', 'Rail', 'Bus', 'Combined f', 'Flights'
-     for x in ['Index Score 2013', 'Life Expectancy 2009-13', 'Subjective well-being average score, 2013']:
-         fig, ax = plt.subplots(figsize=(10, 10))
-         sns.scatterplot(ax=ax, data=all_data, x=x, y=y)
-         ax.set_xlabel(x), ax.set_ylabel(y)
-         plt.axvline(all_data[x].median(), c='r'); plt.axhline(all_data[y].median(), c='r')
-         plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/' + y.replace('/', '') + '_' + x.replace('/', '') + '.png', dpi=200,
-                     bbox_inches='tight')
+wellbeing = ['Index Score 2013', 'Subjective well-being average score, 2013']
+transport = ['Car/van purchases and motoring oils', 'All transport', 'Land Transport'] #'Total_transport', 'Car/van pu', 'Other tran', 'Rail', 'Bus', 'Combined f', 'Flights'
 
-font_size = 18
-temp = all_data.rename(columns={'Car/van pu':'Car/van purchases and motoring oils', 'Combined f':'Combined Fares'})
-corr_summary = corr_summary.rename(columns={'Car/van pu':'Car/van purchases and motoring oils', 'Combined f':'Combined Fares'})
-for y in ['Index Score 2013', 'Subjective well-being average score, 2013']:
-    for x in ['Car/van purchases and motoring oils', 'Bus', 'Combined Fares']:
-        plt.rcParams.update({'font.family':'Times New Roman', 'font.size':font_size, 
-                             'axes.labelsize':font_size, 'axes.titlesize':font_size})
-        fig, ax = plt.subplots(figsize=(5, 5))
-        sns.regplot(ax=ax, data=temp, x=x, y=y, color='#5d5d5d', scatter_kws={'s':3.5})
-        if y == 'Index Score 2013':
-            pos_y = 15
-        else:
-            pos_y = 8.35
-        ax.text(temp[x].min(), pos_y, "Pearson's r = " + corr_summary.loc[y, x])
-        ax.set_xlabel(''), ax.set_ylabel('')
-        plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/Regplot_' + y.replace('/', '') + '_' + x.replace('/', '') + '.png', 
-                dpi=200, bbox_inches='tight')
+temp = all_data.rename(columns={'Car/van pu':'Car/van purchases and motoring oils',
+                                'Total_transport':'All transport',
+                                'land_transport':'Land Transport'})
+
+temp_corr = temp.corr()
+
+for j in range(len(wellbeing)):
+    fig, axs = plt.subplots(ncols=len(transport), nrows=1, 
+                            figsize=(5*len(transport), 5), sharey=True)  
+    y = wellbeing[j]
+    for i in range(len(transport)):
+         x=transport[i]
+         
+         axs[i].add_patch(Rectangle((temp[x].median(), temp[y].min()), 
+                                   temp[x].max()-temp[x].median(),
+                                   temp[y].median() - temp[y].min(),
+                                   fc='none', ec='#C54A43', linewidth = 5))
+         sns.scatterplot(ax=axs[i], data=temp, x=x, y=y, color='gray')
+         axs[i].set_title(x); 
+         axs[i].set_ylabel(y); axs[i].set_xlabel('tCO$_{2}$e / capita')
+         
+         if y == 'Index Score 2013':
+             pos_y = 15
+         else:
+             pos_y = 8.3
+         axs[i].text(temp[x].min(), pos_y, "Pearson's r = " + 
+                     str(round(temp_corr.loc[y, x], 2)))
+         print(y, x)
+    
+    plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/' + y.replace('/', '') + '.png', 
+                bbox_inches='tight', dpi=200)
+    
+temp = temp[wellbeing + transport]
+for item in wellbeing + transport:
+    temp[item + '_m'] = 'median or above'
+    temp.loc[temp[item] < temp[item].median(), item + '_m'] = 'below_median'
+    temp[item] = temp[item + '_m']
+temp = temp[wellbeing + transport]
+
+wellbeing_results = pd.DataFrame(columns=['wellbeing_type', 'transport_type'])
+for w in wellbeing:
+    for t in transport:
+        temp2 = temp.groupby([w, t]).count().iloc[:,:1].reset_index()
+        temp2.columns = ['wellbeing', 'transport', 'count']
+        temp2['transport_type'] = t
+        temp2['wellbeing_type'] = w
+        temp2['sum_all'] = temp2['count'].sum()
+        wellbeing_results = wellbeing_results.append(temp2)
+  
+
         
 font_size = 18
 temp = all_data.rename(columns={'Car/van pu':'Car/van purchases and motoring oils', 'Combined f':'Combined Fares', 

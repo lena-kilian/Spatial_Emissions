@@ -46,7 +46,7 @@ for year in [2015, 2017]:
     income[year] = income[year].set_index('MSOA code')[['Net annual income after housing costs']].join(temp)
     income[year].columns = ['hhld_income', 'no_hhlds', 'pop']
     income[year]['hhld_income'] = pd.to_numeric(income[year]['hhld_income'].astype(str).str.replace(',', ''), errors='coerce')
-    income[year]['income'] = income[year]['hhld_income'] * income[year]['no_hhlds'] / income[year]['pop'] / (365/7)
+    income[year]['income'] = ((income[year]['hhld_income'] * income[year]['no_hhlds']) / income[year]['pop']) / (365/7)
     income[year] = income[year].dropna(how='all')
     
 # import census data
