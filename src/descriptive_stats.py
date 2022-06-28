@@ -99,3 +99,8 @@ plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Bar_London_descriptives_emiss
 
 
 means_summary = means.rename(index=dict(zip(transport + var_list + msoa_vars, new_dict))).T
+
+
+# get ptal summary
+ptal = data[['AI2015', 'PTAL2015', 'AI2015_ln']].groupby('PTAL2015').describe()\
+    .swaplevel(axis=1)[['min', 'max']]
