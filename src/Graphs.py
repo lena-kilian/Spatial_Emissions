@@ -132,5 +132,5 @@ for item in [True, False]:
     plt.title('Is London? - ' + str(item)); plt.ylim(0, 3); 
     plt.show()
 
-change = by_year[idx].reset_index().corr()[['year']]
+change = by_year[idx].reset_index().corr()#[['year']]
     

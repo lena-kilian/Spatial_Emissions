@@ -95,3 +95,12 @@ for ghg in ghg_list:
             
 local_results.merge(global_results, on=['transport', 'pred', 'income_controlled'])\
     .to_csv(wd + 'Spatial_Emissions/outputs/GWR/local_coeffs/all_for_plot.csv')
+    
+    
+check = cp.copy(local_results)
+check['>0'] = False; check.loc[check['local_coeffs'] >0, '>0'] = True
+check = check.groupby(['transport', 'pred', 'income_controlled', '>0']).describe().droplevel(axis=1, level=0)[['count']].unstack(level='>0')
+
+check = local_results.groupby(['transport', 'pred', 'income_controlled']).describe().join(check)
+
+

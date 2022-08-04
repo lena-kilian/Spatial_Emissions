@@ -83,7 +83,7 @@ for (product in product_list){ #'rental_tax', 'water',  'other_priv'
       tm_fill('predictor', midpoint = 0, style = style, n=n, title="Local Coefficients") + 
       tm_style("col_blind") +
       tm_borders(lwd = 0.1) +
-      tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.999), title.size = 0.5,
+      tm_layout(frame = F, title='', title.position = c(0, 0.999), title.size = 0.5,
                 legend.position = c(0.8, 0), legend.title.size = 1.8, legend.title.fontfamily="Times New Roman",
                 legend.text.size = 1.5, legend.text.fontfamily="Times New Roman", outer.margins=c(0, 0, 0, 0.1))
     tmap_save(map, paste('Spatial_Emissions/outputs/GWR/maps/London_', str_replace_all(product, "[^[:alnum:]]", ""), 
@@ -225,7 +225,7 @@ for (product in product_list){
       tm_fill('predictor', midpoint = 0, style = style, n=n, title="Local Coefficients") + 
       tm_style("col_blind") +
       tm_borders(lwd = 0.1) +
-      tm_layout(frame = F, title=paste(product, variable, 'w_inc', sep='_'), title.position = c(0, 0.999), title.size = 0.5,
+      tm_layout(frame = F, title='', title.position = c(0, 0.999), title.size = 0.5,
                 legend.position = c(0.8, 0), legend.title.size = 1.8, legend.title.fontfamily="Times New Roman",
                 legend.text.size = 1.5, legend.text.fontfamily="Times New Roman", outer.margins=c(0, 0, 0, 0.1))
     tmap_save(map, paste('Spatial_Emissions/outputs/GWR/maps/INC_PTD_London_', str_replace_all(product, "[^[:alnum:]]", ""), 

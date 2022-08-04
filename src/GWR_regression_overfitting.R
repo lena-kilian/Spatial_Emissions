@@ -21,59 +21,44 @@ style <- "kmeans"
 shp_data <- read_sf(paste('data/processed/GWR_data/gwr_data_london_', yr, '.shp', sep='')) %>%
   st_transform(CRS("+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +units=m +no_defs")) %>%
   mutate(total_inc = income * population / 1000, 
-         total_work = avg_workpl * population / 10,
-         MSOA11CD = index) %>%
-  st_drop_geometry()
+         total_work = avg_workpl * population / 10)
+
+names(shp_data) <- c("MSOA11CD", "RGN11NM", "AI2015", "PTAL2015", "AI", "other", 
+                     "Car", "Other", "Rail", "Bus", "Cf", "Flights", 
+                     "population",
+                     "pop_65._pc", "p65", "pop_14._pc", "p14", "not_lim", "not_lim_pc", "bame_pct", "work", "avg_workpl", "income",
+                     "pc_Car.van", "pc_Other.t", "pc_Rail", "pc_Bus", "pc_Combine", "pc_Flights",
+                     "bame", "lim", "geometry", "inc")
+
+result_data <- select(shp_data, MSOA11CD)
+  
+shp_data <- st_drop_geometry(shp_data)
 
 # -------------------------------------------
 # 2017 by products
 # -------------------------------------------
 product_list <- shp_data %>% select(other:population, -other, -population) %>% names()
 
-
-results <- data.frame(matrix(ncol = 2, nrow = 0))
-colnames(results) <- c('product', 'predictor')
-
 #provide column names
 colnames(df) <- c('var1', 'var2', 'var3')
 # get R2 for all models
 for (product in product_list){ #'rental_tax', 'water',  'other_priv'
-  for (variable in c('total_work', 'AI2015_ln', 'lim', 'pop_65.', 'pop_14.', 'total_inc', 'bame')){
+  for (variable in c('work', 'AI', 'lim', 'p65', 'p14', 'inc', 'bame')){
     # create for loops to run income and others in same run
-    if (variable == 'total_inc'){
+    if (variable == 'inc'){
       temp <- shp_data %>% rename(ghg=product, predictor=variable) %>% select(MSOA11CD, predictor, ghg, population) %>% drop_na()
       formula <-'ghg ~ predictor + population'}
-    if (variable != 'total_inc'){
-      temp <- shp_data %>% rename(ghg=product, predictor=variable) %>% select(MSOA11CD, predictor, ghg, population, total_inc) %>% drop_na()
-      formula <-'ghg ~ predictor + population + total_inc'}
+    if (variable != 'inc'){
+      temp <- shp_data %>% rename(ghg=product, predictor=variable) %>% select(MSOA11CD, predictor, ghg, population, inc) %>% drop_na()
+      formula <-'ghg ~ predictor + population + inc'}
     
     # run linear regression model for all
     mod <- lm(formula, data = temp)
     
     # save results 
-    results.temp <- data.frame(matrix(ncol = 0, nrow = 1))
-    results.temp$prodcut <- product
-    results.temp$predictor <- variable
-    results.temp$formula <- formula
-    results.temp$adjR2 <- summary(mod)$adj.r.squared
-    
-    # run cross validation
-    temp.shuffle <- temp[sample(1:nrow(temp)), ]
-    temp.shuffle$cv_group <- rep(seq(1, 10), ceiling(nrow(temp.shuffle)/10))[1:nrow(temp.shuffle)]
-    
-    for (i in seq(1, 10)){
-      temp.train <- filter(temp.shuffle, cv_group != i)
-      temp.test <- filter(temp.shuffle, cv_group == i)
-      
-      mod.train <- lm(formula, data = temp.train)
-      temp.test$predicted_vals <- predict(mod.train, temp.test)
-      
-      mse <- mean((temp.test$ghg - temp.test$predicted_vals)**2)
-      results.temp[paste('cv_', i, sep='')] <- sqrt(mse)}
-    
-    results <- rbind(results, results.temp)
+    result_data[paste(product, variable, sep='_')] <- mod$residuals
     }
 }
 
-
+st_write(result_data, "data/processed/GWR_data/LM_residuals.shp", append=FALSE) 
 

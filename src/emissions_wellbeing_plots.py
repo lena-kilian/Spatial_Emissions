@@ -225,7 +225,7 @@ temp_corr = temp.corr()
 
 for j in range(len(wellbeing)):
     fig, axs = plt.subplots(ncols=len(transport), nrows=1, 
-                            figsize=(5*len(transport), 5), sharey=True)  
+                            figsize=(10*len(transport), 10), sharey=True)  
     y = wellbeing[j]
     for i in range(len(transport)):
          x=transport[i]
@@ -247,7 +247,7 @@ for j in range(len(wellbeing)):
          print(y, x)
     
     plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/' + y.replace('/', '') + '.png', 
-                bbox_inches='tight', dpi=200)
+                bbox_inches='tight', dpi=300)
     
 temp = temp[wellbeing + transport]
 for item in wellbeing + transport:
@@ -286,7 +286,7 @@ for y in ['Index Score 2013', 'Subjective well-being average score, 2013']:
         ax.set_xlabel(''), ax.set_ylabel('')
         
         plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/Colplot_' + y.replace('/', '') + '_' + x.replace('/', '') + '.png', 
-                dpi=200, bbox_inches='tight')
+                dpi=300, bbox_inches='tight')
         
 plt.rcParams.update({'font.family':'Times New Roman', 'font.size':font_size, 
                              'axes.labelsize':font_size, 'axes.titlesize':font_size})
@@ -294,7 +294,7 @@ fig, ax = plt.subplots(figsize=(5, 5))
 sns.scatterplot(ax=ax, data=temp, x=x, y=y, hue='Population (1,000)', palette='Blues', edgecolor='black')
 ax.legend(loc='center left', title='Population (1,000)', bbox_to_anchor=(1, 0.5), ncol=1)
 plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/Colplot_legend.png', 
-                dpi=200, bbox_inches='tight')
+                dpi=300, bbox_inches='tight')
 
 
 ########
@@ -371,7 +371,7 @@ for k in range(len(colours)):
     axs[r-1, int((c+1)/2)+k-3].legend(handles=legend_elements, loc='lower left', frameon=False,
                                       bbox_to_anchor=((k-1)*(font_size*0.1), -size*0.1))
 
-plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing_Emission_Maps.png', bbox_inches='tight', dpi=200)
+plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing_Emission_Maps.png', bbox_inches='tight', dpi=300)
 
 
 # individual pictures
@@ -388,7 +388,7 @@ for i in range(r):
         temp.plot(ax=ax, column='Category', cmap=my_cols)
         #hide axes
         plt.axis('off')
-        plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Maps/' + em + '_' + wb + '.png', dpi=200,
+        plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Maps/' + em + '_' + wb + '.png', dpi=300,
                     bbox_inches='tight', pad_inches=-0.1)
         
         
@@ -404,7 +404,7 @@ for wb in corr_vars_wb:
     temp.plot(ax=ax, column='Category', cmap=my_cols)
     #hide axes
     plt.axis('off')
-    plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Maps/Carvan pu_' + wb + '.png', dpi=200,
+    plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Maps/Carvan pu_' + wb + '.png', dpi=300,
                 bbox_inches='tight', pad_inches=-0.1)
         
         

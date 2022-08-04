@@ -22,7 +22,7 @@ for (product in product_list){
     tm_fill(product, mid="#ffffff", midpoint=midpoint, style = "quantile", n=5, title=expression("tCO"[2]*"e/capita"),
             palette = "-RdBu") + 
     tm_borders(lwd = 0.1) +
-    tm_layout(frame = F, title=paste(product), title.position = c(0, 0.999), title.size = 0.5,
+    tm_layout(frame = F, title='', title.position = c(0, 0.999), title.size = 0.5,
               legend.position = c(0.8, 0), legend.title.size = 2, legend.title.fontfamily="Times New Roman", 
               legend.text.size = 1.5, legend.text.fontfamily="Times New Roman", outer.margins=c(0, 0, 0, 0.11))
   tmap_save(map, paste('Spatial_Emissions/outputs/Maps/London_', str_replace_all(product, "[^[:alnum:]]", ""), '.png', sep=''))
