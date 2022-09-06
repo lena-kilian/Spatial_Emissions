@@ -18,6 +18,7 @@ import copy as cp
 from scipy.stats import pearsonr
 import numpy as np
 from matplotlib.patches import Rectangle
+import scipy.stats as stats
 
 wd = r'/Users/lenakilian/Documents/Ausbildung/UoLeeds/PhD/Analysis/'
 
@@ -215,7 +216,7 @@ for w in ['Index Score 2013_Group', 'Subjective well-being average score, 2013_G
 ###############
 
 wellbeing = ['Index Score 2013', 'Subjective well-being average score, 2013']
-transport = ['Car/van purchases and motoring oils', 'All transport', 'Land Transport'] #'Total_transport', 'Car/van pu', 'Other tran', 'Rail', 'Bus', 'Combined f', 'Flights'
+transport = ['Car/van purchases and motoring oils', 'Land Transport', 'All transport'] #'Total_transport', 'Car/van pu', 'Other tran', 'Rail', 'Bus', 'Combined f', 'Flights'
 
 temp = all_data.rename(columns={'Car/van pu':'Car/van purchases and motoring oils',
                                 'Total_transport':'All transport',
@@ -230,10 +231,10 @@ for j in range(len(wellbeing)):
     for i in range(len(transport)):
          x=transport[i]
          
-         axs[i].add_patch(Rectangle((temp[x].median(), temp[y].min()), 
-                                   temp[x].max()-temp[x].median(),
-                                   temp[y].median() - temp[y].min(),
-                                   fc='none', ec='#C54A43', linewidth = 5))
+         axs[i].add_patch(Rectangle(xy=(temp[x].min(), temp[y].median()), 
+                                    height=temp[y].max() - temp[y].median(), 
+                                    width=temp[x].median()-temp[x].min(),
+                                    fc='none', ec='#C54A43', linewidth = 3.5))
          sns.scatterplot(ax=axs[i], data=temp, x=x, y=y, color='gray')
          axs[i].set_title(x); 
          axs[i].set_ylabel(y); axs[i].set_xlabel('tCO$_{2}$e / capita')
@@ -241,12 +242,20 @@ for j in range(len(wellbeing)):
          if y == 'Index Score 2013':
              pos_y = 15
          else:
-             pos_y = 8.3
-         axs[i].text(temp[x].min(), pos_y, "Pearson's r = " + 
-                     str(round(temp_corr.loc[y, x], 2)))
+             pos_y = 8.4
+             
+         temp2 = temp[[x, y]].dropna(how='any')
+         r = stats.spearmanr(temp2[x], temp2[y])
+         sig = ''
+         if r[1] < 0.05:
+             sig = '*'
+         if r[1] < 0.01:
+             sig = '**'
+         len_x = (temp[x].max() - temp[x].min()) *0.3 + temp[x].min()
+         axs[i].text(len_x, temp[y].min(), "Spearman Rho = " + str(round(r[0], 2)) + sig)
          print(y, x)
     
-    plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/' + y.replace('/', '') + '.png', 
+    plt.savefig(wd + 'Spatial_Emissions/outputs/Graphs/Wellbeing/Scatter/' + y.replace('/', '') + '_spearman.png', 
                 bbox_inches='tight', dpi=300)
     
 temp = temp[wellbeing + transport]
@@ -266,7 +275,7 @@ for w in wellbeing:
         temp2['sum_all'] = temp2['count'].sum()
         wellbeing_results = wellbeing_results.append(temp2)
   
-
+wellbeing_results['percent'] = wellbeing_results['count'] / wellbeing_results['sum_all'] * 100
         
 font_size = 18
 temp = all_data.rename(columns={'Car/van pu':'Car/van purchases and motoring oils', 'Combined f':'Combined Fares', 

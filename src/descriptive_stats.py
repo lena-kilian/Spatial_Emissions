@@ -28,12 +28,14 @@ scaler = MinMaxScaler(); scaler.fit(data[['AI2015_ln']])
 # fit using the train set
 data[['AI2015_ln_sc']] = scaler.transform(data[['AI2015_ln']]) * 100
 
+data['Total_transport'] = data[['Car/van pu', 'Flights', 'Rail', 'Bus', 'Combined f', 'Other tran']].sum(1)
 
 var_list = ['total_income', 'total_work']
 msoa_vars = ['AI2015_ln_sc', 'AI2015_ln', 'pop_65+_pc', 'pop_14-_pc', 'bame_pct', 'lim_pc']
-transport = ['Car/van pu', 'Flights', 'Rail', 'Bus', 'Combined f', 'Other tran',]
+transport = ['Car/van pu', 'Flights', 'Rail', 'Bus', 'Combined f', 'Other tran', 'Total_transport']
 
 var_dict = ['Car/van\npurchases and\nmotoring oils', 'Flights', 'Rail', 'Bus', 'Combined\nfares', 'Other\ntransport',
+            'Total\ntransport',
             
             'Weekly Income\n(1,000 GBP)', 'Distance to\nworkplace\n(100 km)',
             
